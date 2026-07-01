@@ -1,0 +1,2324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Application Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* Art direction: Job tracking productivity tool → structured, efficient, calm
+   Palette: neutral warm surfaces, teal accent (Nexus)
+   Typography: Inter body — clarity at all sizes
+   Density: dense/balanced — dashboard app */
+
+:root, [data-theme="light"] {
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+  --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
+  --space-12: 3rem; --space-16: 4rem;
+
+  --color-bg: #f7f6f2; --color-surface: #f9f8f5; --color-surface-2: #fbfbf9;
+  --color-surface-offset: #f3f0ec; --color-surface-offset-2: #edeae5;
+  --color-surface-dynamic: #e6e4df; --color-divider: #dcd9d5; --color-border: #d4d1ca;
+  --color-text: #28251d; --color-text-muted: #7a7974; --color-text-faint: #bab9b4;
+  --color-text-inverse: #f9f8f4;
+  --color-primary: #01696f; --color-primary-hover: #0c4e54; --color-primary-active: #0f3638;
+  --color-primary-highlight: #cedcd8;
+  --color-warning: #964219; --color-warning-hover: #713417;
+  --color-warning-highlight: #ddcfc6;
+  --color-error: #a12c7b; --color-error-hover: #7d1e5e; --color-error-highlight: #e0ced7;
+  --color-success: #437a22; --color-success-hover: #2e5c10; --color-success-highlight: #d4dfcc;
+  --color-blue: #006494; --color-blue-highlight: #c6d8e4;
+  --color-gold: #d19900; --color-gold-highlight: #e9e0c6;
+  --color-purple: #7a39bb; --color-purple-highlight: #dacfde;
+  --color-notification: #a13544; --color-notification-highlight: #dececb;
+  --color-orange: #da7101; --color-orange-highlight: #e7d7c4;
+
+  --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem;
+  --radius-xl: 1rem; --radius-full: 9999px;
+  --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --shadow-sm: 0 1px 2px oklch(0.2 0.01 80 / 0.06);
+  --shadow-md: 0 4px 12px oklch(0.2 0.01 80 / 0.08);
+  --shadow-lg: 0 12px 32px oklch(0.2 0.01 80 / 0.12);
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --content-wide: 1200px;
+}
+
+[data-theme="dark"] {
+  --color-bg: #171614; --color-surface: #1c1b19; --color-surface-2: #201f1d;
+  --color-surface-offset: #1d1c1a; --color-surface-offset-2: #22211f;
+  --color-surface-dynamic: #2d2c2a; --color-divider: #262523; --color-border: #393836;
+  --color-text: #cdccca; --color-text-muted: #797876; --color-text-faint: #5a5957;
+  --color-text-inverse: #2b2a28;
+  --color-primary: #4f98a3; --color-primary-hover: #227f8b; --color-primary-active: #1a626b;
+  --color-primary-highlight: #313b3b;
+  --color-warning: #bb653b; --color-warning-hover: #b95525; --color-warning-highlight: #564942;
+  --color-error: #d163a7; --color-error-hover: #b9478f; --color-error-highlight: #4c3d46;
+  --color-success: #6daa45; --color-success-hover: #4d8f25; --color-success-highlight: #3a4435;
+  --color-blue: #5591c7; --color-blue-highlight: #3a4550;
+  --color-gold: #e8af34; --color-gold-highlight: #4d4332;
+  --color-purple: #a86fdf; --color-purple-highlight: #4e4652;
+  --color-notification: #dd6974; --color-notification-highlight: #574848;
+  --color-orange: #fdab43; --color-orange-highlight: #564b3e;
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.2);
+  --shadow-md: 0 4px 12px oklch(0 0 0 / 0.3);
+  --shadow-lg: 0 12px 32px oklch(0 0 0 / 0.4);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; height: 100%; overflow: hidden; }
+body {
+  min-height: 100dvh; height: 100dvh; overflow: hidden;
+  font-family: var(--font-body); font-size: var(--text-sm);
+  color: var(--color-text); background: var(--color-bg);
+}
+img, picture, video, canvas, svg { display: block; max-width: 100%; }
+input, button, textarea, select { font: inherit; color: inherit; }
+h1,h2,h3,h4,h5,h6 { text-wrap: balance; line-height: 1.2; }
+button { cursor: pointer; background: none; border: none; }
+table { border-collapse: collapse; width: 100%; }
+a, button, [role="button"], input, textarea, select {
+  transition: color var(--transition-interactive), background var(--transition-interactive),
+    border-color var(--transition-interactive), box-shadow var(--transition-interactive);
+}
+:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; border-radius: var(--radius-sm); }
+::selection { background: oklch(from var(--color-primary) l c h / 0.2); color: var(--color-text); }
+
+
+/* NEW FEATURES CSS */
+.timeline { display:flex; flex-direction:column; gap:var(--space-3); margin-top:var(--space-3); }
+.timeline-item { display:flex; gap:var(--space-3); position:relative; }
+.timeline-item::before { content:''; position:absolute; left:5px; top:18px; bottom:-12px; width:2px; background:var(--color-border); z-index:0; }
+.timeline-item:last-child::before { display:none; }
+.timeline-icon { width:12px; height:12px; border-radius:50%; background:var(--color-primary); position:relative; z-index:1; margin-top:5px; flex-shrink:0; border:2px solid var(--color-surface); box-sizing:content-box; }
+.timeline-content { flex:1; background:var(--color-surface-offset); padding:var(--space-2) var(--space-3); border-radius:var(--radius-md); font-size:var(--text-xs); color:var(--color-text); }
+.timeline-date { color:var(--color-text-faint); margin-bottom:2px; font-size:10px; text-transform:uppercase; letter-spacing:0.05em; font-weight:600; }
+
+.reminder-strip { display:flex; flex-direction:column; gap:var(--space-2); margin-bottom:var(--space-5); }
+.reminder-card { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-3) var(--space-4); border-radius:var(--radius-md); border-left:4px solid var(--color-primary); background:var(--color-primary-highlight); cursor:pointer; transition:transform 0.15s; }
+.reminder-card:hover { transform:translateY(-1px); }
+.reminder-card.urgent { border-left-color:var(--color-error); background:var(--color-error-highlight); }
+.reminder-card.warning { border-left-color:var(--color-warning); background:var(--color-warning-highlight); }
+
+.bulk-bar { position:fixed; bottom:var(--space-6); left:50%; transform:translateX(-50%) translateY(150%); background:var(--color-surface); border:1px solid var(--color-border); box-shadow:var(--shadow-lg); border-radius:var(--radius-full); padding:var(--space-2) var(--space-4); display:flex; align-items:center; gap:var(--space-4); z-index:100; transition:transform var(--transition-interactive), opacity var(--transition-interactive); opacity:0; pointer-events:none;}
+.bulk-bar.visible { transform:translateX(-50%) translateY(0); opacity:1; pointer-events:auto;}
+
+/* LAYOUT */
+.app {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  grid-template-rows: auto 1fr;
+  height: 100dvh;
+}
+
+/* SIDEBAR */
+.sidebar {
+  grid-row: 1 / -1;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  display: flex; flex-direction: column;
+  overflow-y: auto; overscroll-behavior: contain;
+  padding: var(--space-4) var(--space-3);
+  gap: var(--space-1);
+}
+.sidebar-logo {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-2) var(--space-3) var(--space-5);
+  color: var(--color-primary);
+}
+.sidebar-logo span {
+  font-size: var(--text-base); font-weight: 600;
+  color: var(--color-text); letter-spacing: -0.01em;
+}
+.sidebar-section-label {
+  font-size: var(--text-xs); font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--color-text-faint);
+  padding: var(--space-4) var(--space-3) var(--space-2);
+}
+.nav-item {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md); cursor: pointer;
+  font-size: var(--text-sm); font-weight: 450;
+  color: var(--color-text-muted);
+  transition: all var(--transition-interactive);
+  border: none; background: none; width: 100%; text-align: left;
+}
+.nav-item:hover { background: var(--color-surface-offset); color: var(--color-text); }
+.nav-item.active { background: var(--color-primary-highlight); color: var(--color-primary); font-weight: 500; }
+.nav-item.active svg { color: var(--color-primary); }
+.nav-badge {
+  margin-left: auto; background: var(--color-primary-highlight);
+  color: var(--color-primary); font-size: var(--text-xs);
+  padding: 1px 7px; border-radius: var(--radius-full); font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.sidebar-footer {
+  margin-top: auto; padding-top: var(--space-4);
+  border-top: 1px solid var(--color-divider);
+  padding: var(--space-4) var(--space-3) var(--space-2);
+}
+.sidebar-stats {
+  display: flex; flex-direction: column; gap: var(--space-2);
+}
+.stat-mini {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: var(--text-xs); color: var(--color-text-muted);
+}
+.stat-mini strong { color: var(--color-text); font-variant-numeric: tabular-nums; }
+
+/* HEADER */
+.header {
+  grid-column: 2;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  display: flex; align-items: center; gap: var(--space-4);
+  padding: var(--space-3) var(--space-6);
+  position: sticky; top: 0; z-index: 10;
+  min-height: 56px;
+}
+.header-title {
+  font-size: var(--text-lg); font-weight: 650;
+  letter-spacing: -0.02em; color: var(--color-text);
+}
+.header-sub { font-size: var(--text-xs); color: var(--color-text-muted); }
+.header-actions { margin-left: auto; display: flex; align-items: center; gap: var(--space-3); }
+.search-bar {
+  display: flex; align-items: center; gap: var(--space-2);
+  background: var(--color-bg); border: 1px solid var(--color-border);
+  border-radius: var(--radius-md); padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm); color: var(--color-text-muted);
+  min-width: 200px; transition: all var(--transition-interactive);
+}
+.search-bar:focus-within {
+  border-color: var(--color-primary); background: var(--color-surface-2);
+  color: var(--color-text);
+}
+.search-bar input {
+  background: none; border: none; outline: none; width: 100%;
+  font-size: var(--text-sm); color: var(--color-text);
+}
+.search-bar input::placeholder { color: var(--color-text-faint); }
+
+/* BUTTONS */
+.btn {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-2) var(--space-4); border-radius: var(--radius-md);
+  font-size: var(--text-sm); font-weight: 500;
+  border: 1px solid transparent; cursor: pointer;
+  transition: all var(--transition-interactive); line-height: 1.4;
+  min-height: 36px; white-space: nowrap;
+}
+.btn-primary {
+  background: var(--color-primary); color: var(--color-text-inverse);
+  border-color: var(--color-primary);
+}
+.btn-primary:hover { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
+.btn-ghost {
+  background: transparent; color: var(--color-text-muted);
+  border-color: oklch(from var(--color-text) l c h / 0.12);
+}
+.btn-ghost:hover { background: var(--color-surface-offset); color: var(--color-text); }
+.btn-icon {
+  padding: var(--space-2); min-width: 36px; justify-content: center;
+}
+.theme-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--color-text-muted); padding: var(--space-2);
+  border-radius: var(--radius-md); display: flex; align-items: center;
+  min-height: 36px; min-width: 36px; justify-content: center;
+}
+.theme-btn:hover { background: var(--color-surface-offset); color: var(--color-text); }
+
+/* MAIN */
+.main {
+  grid-column: 2;
+  overflow-y: auto; overscroll-behavior: contain;
+  padding: var(--space-6);
+  background: var(--color-bg);
+}
+
+/* KPI CARDS */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr));
+  gap: var(--space-4); margin-bottom: var(--space-6);
+}
+.kpi-card {
+  background: var(--color-surface);
+  border: 1px solid oklch(from var(--color-text) l c h / 0.08);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-interactive);
+}
+.kpi-card:hover { box-shadow: var(--shadow-md); }
+.kpi-label {
+  font-size: var(--text-xs); font-weight: 500; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--color-text-muted); margin-bottom: var(--space-2);
+}
+.kpi-value {
+  font-size: var(--text-xl); font-weight: 700; letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--color-text); line-height: 1;
+}
+.kpi-meta { font-size: var(--text-xs); color: var(--color-text-faint); margin-top: var(--space-2); }
+.kpi-dot { width: 8px; height: 8px; border-radius: var(--radius-full); display: inline-block; margin-right: var(--space-2); }
+
+/* FILTER BAR */
+.filter-bar {
+  display: flex; align-items: center; gap: var(--space-3);
+  margin-bottom: var(--space-5); flex-wrap: wrap;
+}
+.filter-chip {
+  display: inline-flex; align-items: center; gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full); font-size: var(--text-xs);
+  font-weight: 500; cursor: pointer; border: 1px solid transparent;
+  transition: all var(--transition-interactive);
+  background: var(--color-surface); border-color: var(--color-border);
+  color: var(--color-text-muted);
+}
+.filter-chip:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.filter-chip.active { background: var(--color-primary-highlight); border-color: var(--color-primary); color: var(--color-primary); }
+.filter-label { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 500; }
+.filter-spacer { flex: 1; }
+
+/* KANBAN */
+.kanban-view { display: none; }
+.kanban-view.active { display: flex; gap: var(--space-4); overflow-x: auto; padding-bottom: var(--space-4); }
+.kanban-col {
+  min-width: 260px; flex: 1;
+  background: var(--color-surface);
+  border: 1px solid oklch(from var(--color-text) l c h / 0.08);
+  border-radius: var(--radius-lg);
+  display: flex; flex-direction: column; max-height: 70vh;
+}
+.kanban-col-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-4); border-bottom: 1px solid var(--color-divider);
+  gap: var(--space-2);
+}
+.kanban-col-title {
+  display: flex; align-items: center; gap: var(--space-2);
+  font-size: var(--text-sm); font-weight: 600; color: var(--color-text);
+}
+.kanban-col-count {
+  font-size: var(--text-xs); color: var(--color-text-muted);
+  background: var(--color-surface-offset); padding: 2px 8px;
+  border-radius: var(--radius-full); font-variant-numeric: tabular-nums;
+}
+.kanban-col-body { overflow-y: auto; padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-3); overscroll-behavior: contain; }
+.kanban-card {
+  background: var(--color-surface-2);
+  border: 1px solid oklch(from var(--color-text) l c h / 0.08);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer; transition: box-shadow var(--transition-interactive), transform var(--transition-interactive);
+}
+.kanban-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.kanban-card-company { font-size: var(--text-xs); font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.kanban-card-role { font-size: var(--text-sm); font-weight: 600; color: var(--color-text); margin: var(--space-1) 0; }
+.kanban-card-meta { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); flex-wrap: wrap; }
+
+/* TABLE VIEW */
+.table-view { display: none; }
+.table-view.active { display: block; }
+.table-container {
+  background: var(--color-surface);
+  border: 1px solid oklch(from var(--color-text) l c h / 0.08);
+  border-radius: var(--radius-lg); overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+table { border-collapse: collapse; width: 100%; }
+thead { background: var(--color-surface-offset); position: sticky; top: 0; z-index: 1; }
+th {
+  font-size: var(--text-xs); font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--color-text-muted);
+  padding: var(--space-3) var(--space-4); text-align: left;
+  border-bottom: 1px solid var(--color-divider);
+  white-space: nowrap; cursor: pointer; user-select: none;
+}
+th:hover { color: var(--color-text); }
+td {
+  padding: var(--space-3) var(--space-4); font-size: var(--text-sm);
+  border-bottom: 1px solid oklch(from var(--color-text) l c h / 0.05);
+  vertical-align: middle; font-variant-numeric: tabular-nums;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--color-surface-2); }
+.td-company { font-weight: 600; color: var(--color-text); }
+.td-role { color: var(--color-text-muted); }
+.td-date { color: var(--color-text-faint); font-size: var(--text-xs); }
+.td-actions { display: flex; gap: var(--space-2); justify-content: flex-end; }
+.td-actions button { color: var(--color-text-faint); padding: var(--space-1); border-radius: var(--radius-sm); }
+.td-actions button:hover { color: var(--color-text); background: var(--color-surface-offset); }
+
+/* BADGES / STATUS */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px 10px; border-radius: var(--radius-full);
+  font-size: var(--text-xs); font-weight: 600; white-space: nowrap;
+}
+.badge-applied { background: var(--color-blue-highlight); color: var(--color-blue); }
+.badge-screening { background: var(--color-gold-highlight); color: var(--color-gold); }
+.badge-interview { background: var(--color-purple-highlight); color: var(--color-purple); }
+.badge-offer { background: var(--color-success-highlight); color: var(--color-success); }
+.badge-rejected { background: var(--color-error-highlight); color: var(--color-error); }
+.badge-ghosted { background: var(--color-surface-dynamic); color: var(--color-text-muted); }
+.badge-wishlist { background: var(--color-warning-highlight); color: var(--color-warning); }
+
+/* PRIORITY DOT */
+.priority-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.priority-high { background: var(--color-error); }
+.priority-mid { background: var(--color-gold); }
+.priority-low { background: var(--color-success); }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed; inset: 0; background: oklch(0.15 0.01 80 / 0.55);
+  backdrop-filter: blur(4px); z-index: 100;
+  display: none; align-items: center; justify-content: center; padding: var(--space-4);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6); width: 100%; max-width: 540px;
+  box-shadow: var(--shadow-lg);
+  max-height: 90vh; overflow-y: auto;
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: var(--space-5);
+}
+.modal-title { font-size: var(--text-lg); font-weight: 650; letter-spacing: -0.02em; }
+.modal-close {
+  color: var(--color-text-muted); padding: var(--space-2);
+  border-radius: var(--radius-md); display: flex; align-items: center;
+}
+.modal-close:hover { background: var(--color-surface-offset); color: var(--color-text); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+.form-group { display: flex; flex-direction: column; gap: var(--space-2); }
+.form-group.full { grid-column: 1 / -1; }
+label { font-size: var(--text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--color-text-muted); }
+input, select, textarea {
+  background: var(--color-bg); border: 1px solid var(--color-border);
+  border-radius: var(--radius-md); padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm); color: var(--color-text);
+  transition: border-color var(--transition-interactive), box-shadow var(--transition-interactive);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px oklch(from var(--color-primary) l c h / 0.15);
+}
+textarea { resize: vertical; min-height: 80px; font-family: var(--font-body); }
+.modal-footer { display: flex; gap: var(--space-3); justify-content: flex-end; margin-top: var(--space-5); }
+
+/* EMPTY STATE */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; padding: var(--space-16) var(--space-8);
+  color: var(--color-text-muted);
+}
+.empty-icon { color: var(--color-text-faint); margin-bottom: var(--space-4); }
+.empty-state h3 { color: var(--color-text); font-size: var(--text-base); margin-bottom: var(--space-2); }
+.empty-state p { max-width: 36ch; font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-5); }
+
+/* DETAIL PANEL */
+.detail-panel {
+  position: fixed; top: 0; right: -480px; bottom: 0; width: 460px;
+  background: var(--color-surface); border-left: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg); z-index: 50;
+  display: flex; flex-direction: column;
+  transition: right 0.28s cubic-bezier(0.16,1,0.3,1);
+  overflow-y: auto;
+}
+.detail-panel.open { right: 0; }
+.detail-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: var(--space-6); border-bottom: 1px solid var(--color-divider);
+  gap: var(--space-4);
+}
+.detail-company { font-size: var(--text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--color-primary); }
+.detail-role { font-size: var(--text-xl); font-weight: 700; letter-spacing: -0.025em; color: var(--color-text); margin: var(--space-2) 0; }
+.detail-body { padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-5); }
+.detail-section-title { font-size: var(--text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--color-text-muted); margin-bottom: var(--space-3); }
+.detail-field { display: flex; flex-direction: column; gap: var(--space-1); }
+.detail-field-label { font-size: var(--text-xs); color: var(--color-text-faint); font-weight: 500; }
+.detail-field-value { font-size: var(--text-sm); color: var(--color-text); }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+.status-changer { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+.status-btn {
+  padding: var(--space-1) var(--space-3); border-radius: var(--radius-full);
+  font-size: var(--text-xs); font-weight: 600; cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all var(--transition-interactive);
+  opacity: 0.6;
+}
+.status-btn:hover, .status-btn.active { opacity: 1; transform: scale(1.03); }
+.status-btn-applied { background: var(--color-blue-highlight); color: var(--color-blue); border-color: var(--color-blue); }
+.status-btn-screening { background: var(--color-gold-highlight); color: var(--color-gold); border-color: var(--color-gold); }
+.status-btn-interview { background: var(--color-purple-highlight); color: var(--color-purple); border-color: var(--color-purple); }
+.status-btn-offer { background: var(--color-success-highlight); color: var(--color-success); border-color: var(--color-success); }
+.status-btn-rejected { background: var(--color-error-highlight); color: var(--color-error); border-color: var(--color-error); }
+.status-btn-ghosted { background: var(--color-surface-dynamic); color: var(--color-text-muted); border-color: var(--color-border); }
+.status-btn-wishlist { background: var(--color-warning-highlight); color: var(--color-warning); border-color: var(--color-warning); }
+.notes-area { background: var(--color-surface-offset); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3); min-height: 100px; font-size: var(--text-sm); font-family: var(--font-body); color: var(--color-text); resize: none; width: 100%; }
+.notes-area:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px oklch(from var(--color-primary) l c h / 0.15); }
+.delete-btn { color: var(--color-error); padding: var(--space-2); border-radius: var(--radius-md); }
+.delete-btn:hover { background: var(--color-error-highlight); }
+
+/* TOAST */
+.toast-container { position: fixed; bottom: var(--space-6); right: var(--space-6); z-index: 200; display: flex; flex-direction: column; gap: var(--space-2); pointer-events: none; }
+.toast {
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm); color: var(--color-text);
+  box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: var(--space-3);
+  animation: slide-up 0.25s cubic-bezier(0.16,1,0.3,1);
+  pointer-events: auto;
+}
+@keyframes slide-up { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+@keyframes fade-out { from { opacity:1; } to { opacity:0; } }
+
+/* VIEW TOGGLE */
+.view-toggle { display: flex; gap: var(--space-1); background: var(--color-surface-offset); padding: var(--space-1); border-radius: var(--radius-md); }
+.view-btn {
+  display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-3);
+  border-radius: calc(var(--radius-md) - 2px); font-size: var(--text-xs); font-weight: 500;
+  color: var(--color-text-muted); background: none; border: none; cursor: pointer;
+  transition: all var(--transition-interactive);
+}
+.view-btn.active { background: var(--color-surface); color: var(--color-text); box-shadow: var(--shadow-sm); }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .app { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; }
+  .sidebar { grid-row: auto; grid-column: 1; display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; height: auto; padding: var(--space-2) var(--space-3); border-right: none; border-bottom: 1px solid var(--color-border); }
+  .sidebar-logo { padding: var(--space-2) var(--space-3) var(--space-2); }
+  .sidebar-section-label, .sidebar-footer, .nav-badge { display: none; }
+  .nav-item span { display: none; }
+  .nav-item { padding: var(--space-2); min-width: 44px; justify-content: center; }
+  .header { grid-column: 1; }
+  .main { grid-column: 1; padding: var(--space-4) var(--space-3); }
+  .form-grid { grid-template-columns: 1fr; }
+  .detail-panel { width: 100%; right: -100%; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .search-bar { min-width: 140px; }
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-label="JobTrack logo">
+        <rect width="28" height="28" rx="7" fill="currentColor"/>
+        <rect x="6" y="10" width="16" height="2.5" rx="1.25" fill="white" opacity="0.9"/>
+        <rect x="6" y="15" width="11" height="2.5" rx="1.25" fill="white" opacity="0.65"/>
+        <circle cx="21" cy="16.25" r="3.5" fill="white" opacity="0.9"/>
+        <path d="M20 16.25l.8.8 1.8-1.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>JobTrack</span>
+    </div>
+    <div class="sidebar-section-label">Views</div>
+    <button class="nav-item active" data-view="dashboard" onclick="switchView('dashboard', this)">
+      <i data-lucide="layout-dashboard" width="16" height="16"></i>
+      <span>Dashboard</span>
+      <span class="nav-badge" id="badge-total">0</span>
+    </button>
+    <button class="nav-item" data-view="table" onclick="switchView('table', this)">
+      <i data-lucide="table-2" width="16" height="16"></i>
+      <span>All Applications</span>
+    </button>
+    <button class="nav-item" data-view="kanban" onclick="switchView('kanban', this)">
+      <i data-lucide="kanban" width="16" height="16"></i>
+      <span>Kanban Board</span>
+    </button>
+    <div class="sidebar-section-label">Quick Filters</div>
+    <button class="nav-item" onclick="quickFilter('interview')">
+      <i data-lucide="calendar-check-2" width="16" height="16"></i>
+      <span>Interviews</span>
+      <span class="nav-badge" id="badge-interview">0</span>
+    </button>
+    <button class="nav-item" onclick="quickFilter('offer')">
+      <i data-lucide="party-popper" width="16" height="16"></i>
+      <span>Offers</span>
+      <span class="nav-badge" id="badge-offer">0</span>
+    </button>
+    <button class="nav-item" onclick="quickFilter('wishlist')">
+      <i data-lucide="bookmark" width="16" height="16"></i>
+      <span>Wishlist</span>
+    </button>
+    <button class="nav-item" onclick="openSettings()" id="settings-nav-btn">
+      <i data-lucide="settings" width="16" height="16"></i>
+      <span>Settings</span>
+    </button>
+    <div class="sidebar-footer">
+      <div class="sidebar-stats" id="sidebar-stats"></div>
+    </div>
+  </aside>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div>
+      <div class="header-title" id="header-title">Dashboard</div>
+    </div>
+    <div class="search-bar">
+      <i data-lucide="search" width="14" height="14" style="flex-shrink:0"></i>
+      <input type="text" id="search-input" placeholder="Search company, role…" oninput="onSearch()">
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" onclick="openAddModal()">
+        <i data-lucide="plus" width="15" height="15"></i>
+        Add Application
+      </button>
+      <button class="btn btn-ghost" id="save-btn" onclick="saveFile()" title="Save to file" style="gap:var(--space-2)">
+        <i data-lucide="save" width="15" height="15"></i>
+        <span>Save</span>
+      </button>
+      <button class="btn btn-ghost" onclick="triggerLoad()" title="Load from file" style="gap:var(--space-2)">
+        <i data-lucide="folder-open" width="15" height="15"></i>
+        <span>Load</span>
+      </button>
+      <button class="btn btn-ghost" onclick="openIEModal()" title="Import / Export CSV/JSON">
+        <i data-lucide="arrow-left-right" width="15" height="15"></i>
+        <span>Import / Export</span>
+      </button>
+      <button class="theme-btn" data-theme-toggle aria-label="Toggle theme">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main" id="main-area">
+    <!-- DASHBOARD VIEW -->
+    <div id="view-dashboard" class="view active-view">
+      <div id="dashboard-reminders" class="reminder-strip"></div>
+      <div class="kpi-grid" id="kpi-grid"></div>
+      <div class="filter-bar" id="filter-bar">
+        <span class="filter-label">Status:</span>
+        <button class="filter-chip active" data-status="all" onclick="setFilter('all',this)">All</button>
+        <button class="filter-chip" data-status="wishlist" onclick="setFilter('wishlist',this)">Wishlist</button>
+        <button class="filter-chip" data-status="applied" onclick="setFilter('applied',this)">Applied</button>
+        <button class="filter-chip" data-status="screening" onclick="setFilter('screening',this)">Screening</button>
+        <button class="filter-chip" data-status="interview" onclick="setFilter('interview',this)">Interview</button>
+        <button class="filter-chip" data-status="offer" onclick="setFilter('offer',this)">Offer</button>
+        <button class="filter-chip" data-status="rejected" onclick="setFilter('rejected',this)">Rejected</button>
+        <button class="filter-chip" data-status="ghosted" onclick="setFilter('ghosted',this)">Ghosted</button>
+        <div class="filter-spacer"></div>
+        <div class="view-toggle">
+          <button class="view-btn active" id="vbtn-card" onclick="setCardView('card')"><i data-lucide="layout-grid" width="13" height="13"></i> Cards</button>
+          <button class="view-btn" id="vbtn-list" onclick="setCardView('list')"><i data-lucide="list" width="13" height="13"></i> List</button>
+        </div>
+      </div>
+      <div id="cards-container"></div>
+    </div>
+
+    <!-- TABLE VIEW -->
+    <div id="view-table" class="view" style="display:none">
+    <div id="bulk-action-bar" class="bulk-bar">
+      <span style="font-size:var(--text-sm);font-weight:600"><span id="bulk-count">0</span> selected</span>
+      <div style="width:1px;height:16px;background:var(--color-divider)"></div>
+      <select id="bulk-status" onchange="bulkChangeStatus(this.value)" style="border:none;background:none;font-size:var(--text-sm);cursor:pointer;outline:none;color:var(--color-primary);font-weight:500">
+        <option value="" disabled selected>Change Status…</option>
+        <option value="wishlist">Wishlist</option>
+        <option value="applied">Applied</option>
+        <option value="screening">Screening</option>
+        <option value="interview">Interview</option>
+        <option value="offer">Offer</option>
+        <option value="rejected">Rejected</option>
+        <option value="ghosted">Ghosted</option>
+      </select>
+      <button class="btn btn-ghost btn-icon" style="color:var(--color-error);padding:var(--space-1);min-width:auto" onclick="bulkDelete()" aria-label="Delete selected"><i data-lucide="trash-2" width="16" height="16"></i></button>
+      <button class="btn btn-ghost btn-icon" style="padding:var(--space-1);min-width:auto" onclick="clearSelection()" aria-label="Clear selection"><i data-lucide="x" width="16" height="16"></i></button>
+    </div>
+      <div class="filter-bar">
+        <span class="filter-label">Filter:</span>
+        <button class="filter-chip active" data-status="all" onclick="setFilter('all',this,true)">All</button>
+        <button class="filter-chip" data-status="wishlist" onclick="setFilter('wishlist',this,true)">Wishlist</button>
+        <button class="filter-chip" data-status="applied" onclick="setFilter('applied',this,true)">Applied</button>
+        <button class="filter-chip" data-status="screening" onclick="setFilter('screening',this,true)">Screening</button>
+        <button class="filter-chip" data-status="interview" onclick="setFilter('interview',this,true)">Interview</button>
+        <button class="filter-chip" data-status="offer" onclick="setFilter('offer',this,true)">Offer</button>
+        <button class="filter-chip" data-status="rejected" onclick="setFilter('rejected',this,true)">Rejected</button>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:40px;cursor:default" onclick="event.stopPropagation()"><input type="checkbox" id="selectAll-cb" onchange="toggleAllSelect(this.checked)"></th>
+              <th onclick="sortTable('company')">Company <i data-lucide="chevrons-up-down" width="11" height="11" style="display:inline-block;vertical-align:middle"></i></th>
+              <th onclick="sortTable('role')">Role <i data-lucide="chevrons-up-down" width="11" height="11" style="display:inline-block;vertical-align:middle"></i></th>
+              <th>Status</th>
+              <th>Priority</th>
+              <th onclick="sortTable('date')">Date Applied <i data-lucide="chevrons-up-down" width="11" height="11" style="display:inline-block;vertical-align:middle"></i></th>
+              <th>Location</th>
+              <th>Salary</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+        <div id="table-empty" class="empty-state" style="display:none">
+          <div class="empty-icon"><i data-lucide="inbox" width="40" height="40"></i></div>
+          <h3>No applications found</h3>
+          <p>Try a different filter or add your first application.</p>
+          <button class="btn btn-primary" onclick="openAddModal()"><i data-lucide="plus" width="15" height="15"></i> Add Application</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- KANBAN VIEW -->
+    <div id="view-kanban" class="view kanban-view" style="display:none">
+      <div id="kanban-board"></div>
+    </div>
+  </main>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
+  <div class="modal" role="dialog" aria-labelledby="modal-title-text">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-title-text">Add Application</h2>
+      <button class="modal-close btn-icon" onclick="closeModal()" aria-label="Close">
+        <i data-lucide="x" width="18" height="18"></i>
+      </button>
+    </div>
+    <form id="app-form" onsubmit="submitForm(event)">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="f-company">Company *</label>
+          <input type="text" id="f-company" placeholder="e.g. Stripe" required>
+        </div>
+        <div class="form-group">
+          <label for="f-role">Role *</label>
+          <input type="text" id="f-role" placeholder="e.g. Senior Engineer" required>
+        </div>
+        <div class="form-group">
+          <label for="f-status">Status</label>
+          <select id="f-status">
+            <option value="wishlist">Wishlist</option>
+            <option value="applied" selected>Applied</option>
+            <option value="screening">Screening</option>
+            <option value="interview">Interview</option>
+            <option value="offer">Offer</option>
+            <option value="rejected">Rejected</option>
+            <option value="ghosted">Ghosted</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="f-priority">Priority</label>
+          <select id="f-priority">
+            <option value="high">High</option>
+            <option value="mid" selected>Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="f-date">Date Applied</label>
+          <input type="date" id="f-date">
+        </div>
+        <div class="form-group">
+          <label for="f-location">Location</label>
+          <input type="text" id="f-location" placeholder="e.g. Berlin / Remote">
+        </div>
+        <div class="form-group">
+          <label for="f-salary">Salary Range</label>
+          <input type="text" id="f-salary" placeholder="e.g. €70k–€90k">
+        </div>
+        <div class="form-group">
+          <label for="f-url">Job URL</label>
+          <input type="url" id="f-url" placeholder="https://…">
+        </div>
+        
+        <div class="form-group">
+          <label for="f-int-date">Interview Date</label>
+          <input type="date" id="f-int-date">
+        </div>
+        <div class="form-group">
+          <label for="f-int-time">Interview Time</label>
+          <input type="time" id="f-int-time">
+        </div>
+        <div class="form-group full">
+          <label for="f-notes">Notes</label>
+          <textarea id="f-notes" placeholder="Interview prep notes, contacts, next steps…"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="form-submit-btn">Add Application</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-panel" id="detail-panel">
+  <div class="detail-header">
+    <div>
+      <div class="detail-company" id="dp-company"></div>
+      <div class="detail-role" id="dp-role"></div>
+      <div id="dp-badge"></div>
+    </div>
+    <div style="display:flex;gap:var(--space-2)">
+      <button class="btn btn-ghost btn-icon" onclick="editFromDetail()" aria-label="Edit"><i data-lucide="pencil" width="16" height="16"></i></button>
+      <button class="delete-btn" onclick="deleteFromDetail()" aria-label="Delete"><i data-lucide="trash-2" width="16" height="16"></i></button>
+      <button class="btn btn-ghost btn-icon" onclick="closeDetail()" aria-label="Close"><i data-lucide="x" width="16" height="16"></i></button>
+    </div>
+  </div>
+  <div class="detail-body">
+    <div>
+      <div class="detail-section-title">Update Status</div>
+      <div class="status-changer" id="dp-status-changer"></div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-field"><div class="detail-field-label">Date Applied</div><div class="detail-field-value" id="dp-date">—</div></div>
+      <div class="detail-field"><div class="detail-field-label">Location</div><div class="detail-field-value" id="dp-location">—</div></div>
+      <div class="detail-field"><div class="detail-field-label">Salary</div><div class="detail-field-value" id="dp-salary">—</div></div>
+      <div class="detail-field"><div class="detail-field-label">Priority</div><div class="detail-field-value" id="dp-priority">—</div></div>
+      <div class="detail-field full" style="grid-column:1/-1">
+        <div class="detail-field-label">Job URL</div>
+        <div class="detail-field-value" id="dp-url">—</div>
+      </div>
+    </div>
+    <div>
+      <div class="detail-section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Progress Log</span>
+        <button class="btn btn-ghost btn-icon" style="padding:0;min-width:auto;height:auto" onclick="promptAddLog()" aria-label="Add log"><i data-lucide="plus" width="14" height="14"></i></button>
+      </div>
+      <div id="dp-log" class="timeline" style="margin-bottom:var(--space-5)"></div>
+    </div>
+    <div>
+      <div class="detail-section-title">Notes</div>
+      <textarea class="notes-area" id="dp-notes" placeholder="Add notes, contacts, next steps…" oninput="saveNotes()"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<!-- HIDDEN FILE INPUT -->
+<input type="file" id="load-file-input" accept=".jat" style="display:none" onchange="loadFile(event)">
+<input type="file" id="import-file-input" accept=".csv,.json" style="display:none" onchange="handleImportFile(event)">
+
+<!-- IMPORT/EXPORT MODAL -->
+<div class="modal-overlay" id="ie-modal-overlay" onclick="closeIEModalOnOverlay(event)">
+  <div class="modal" role="dialog" aria-labelledby="ie-modal-title" style="max-width:480px">
+    <div class="modal-header">
+      <h2 class="modal-title" id="ie-modal-title">Import / Export</h2>
+      <button class="modal-close btn-icon" onclick="closeIEModal()" aria-label="Close">
+        <i data-lucide="x" width="18" height="18"></i>
+      </button>
+    </div>
+    <div style="margin-bottom:var(--space-6)">
+      <div style="font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-text-muted);margin-bottom:var(--space-3)">Export</div>
+      <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-4)">Download all your applications as a file you can open in Excel, Google Sheets, or import back later.</p>
+      <div style="display:flex;gap:var(--space-3)">
+        <button class="btn btn-primary" onclick="exportCSV()" style="flex:1">
+          <i data-lucide="file-spreadsheet" width="15" height="15"></i> Export as CSV
+        </button>
+        <button class="btn btn-ghost" onclick="exportJSON()" style="flex:1">
+          <i data-lucide="braces" width="15" height="15"></i> Export as JSON
+        </button>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--color-divider);margin-bottom:var(--space-6)"></div>
+    <div>
+      <div style="font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-text-muted);margin-bottom:var(--space-3)">Import</div>
+      <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-4)">Import from a <strong style="color:var(--color-text)">.csv</strong> or <strong style="color:var(--color-text)">.json</strong> file. Existing applications are preserved — duplicates (same company + role) are skipped.</p>
+      <div id="drop-zone"
+        style="border:2px dashed var(--color-border);border-radius:var(--radius-lg);padding:var(--space-8) var(--space-4);text-align:center;cursor:pointer;transition:all var(--transition-interactive);background:var(--color-bg)"
+        onclick="document.getElementById('import-file-input').click()"
+        ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+        <div style="color:var(--color-text-faint);margin-bottom:var(--space-3)"><i data-lucide="upload-cloud" width="32" height="32" style="display:inline-block"></i></div>
+        <div style="font-size:var(--text-sm);font-weight:500;color:var(--color-text)">Drop file here or click to browse</div>
+        <div style="font-size:var(--text-xs);color:var(--color-text-faint);margin-top:var(--space-1)">Supports .csv and .json</div>
+      </div>
+      <div id="import-preview" style="display:none;margin-top:var(--space-4)">
+        <div style="background:var(--color-primary-highlight);border-radius:var(--radius-md);padding:var(--space-3) var(--space-4);display:flex;align-items:center;justify-content:space-between;gap:var(--space-3)">
+          <div>
+            <div style="font-size:var(--text-sm);font-weight:600;color:var(--color-primary)" id="preview-summary"></div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:2px" id="preview-detail"></div>
+          </div>
+          <button class="btn btn-primary" onclick="confirmImport()" id="confirm-import-btn" style="flex-shrink:0">
+            <i data-lucide="check" width="15" height="15"></i> Import
+          </button>
+        </div>
+      </div>
+      <details style="margin-top:var(--space-4)">
+        <summary style="font-size:var(--text-xs);color:var(--color-text-muted);cursor:pointer;user-select:none;font-weight:500">CSV format reference</summary>
+        <div style="margin-top:var(--space-3);background:var(--color-surface-offset);border-radius:var(--radius-md);padding:var(--space-3);overflow-x:auto">
+          <code style="font-family:var(--font-mono,monospace);font-size:var(--text-xs);color:var(--color-text-muted);white-space:pre">company,role,status,priority,date,location,salary,url,notes
+Stripe,Engineer,applied,high,2026-06-01,Berlin,,https://...,Notes
+Vercel,Designer,wishlist,mid,,,70k-90k,,</code>
+        </div>
+        <div style="margin-top:var(--space-2);font-size:var(--text-xs);color:var(--color-text-faint)">Status: wishlist · applied · screening · interview · offer · rejected · ghosted<br>Priority: high · mid · low · Date: YYYY-MM-DD</div>
+      </details>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let applications = [
+  { id:1, company:'Stripe', role:'Senior Frontend Engineer', status:'interview', priority:'high', date:'2026-05-28', location:'Berlin / Remote', salary:'€90k–€120k', url:'https://stripe.com/jobs', notes:'3rd round. System design next. Contact: Sarah K.', interviewDate: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0], interviewTime: '14:30', log: [{time: new Date().toISOString(), text: 'Scheduled system design round', type: 'interview'}, {time: new Date(new Date().setDate(new Date().getDate() - 10)).toISOString(), text: 'Status changed to Interview', type: 'status'}] },
+  { id:2, company:'Vercel', role:'Developer Relations Engineer', status:'screening', priority:'high', date:'2026-06-01', location:'Remote', salary:'€85k–€100k', url:'', notes:'Initial call with recruiter went well.' },
+  { id:3, company:'Linear', role:'Product Designer', status:'applied', priority:'mid', date:'2026-06-03', location:'Remote', salary:'€75k–€95k', url:'', notes:'' },
+  { id:4, company:'Notion', role:'Software Engineer', status:'applied', priority:'mid', date:'2026-06-05', location:'San Francisco / Remote', salary:'$130k–$180k', url:'', notes:'Applied via referral from Alex.' },
+  { id:5, company:'Figma', role:'Engineering Manager', status:'wishlist', priority:'high', date:'', location:'Berlin', salary:'€110k–€140k', url:'', notes:'Dream job. Watch for openings.' },
+  { id:6, company:'GitLab', role:'Backend Engineer (Ruby)', status:'rejected', priority:'low', date:'2026-05-15', location:'Remote', salary:'€70k–€90k', url:'', notes:'Rejected after technical screen.' },
+  { id:7, company:'Shopify', role:'Staff Engineer', status:'offer', priority:'high', date:'2026-05-20', location:'Remote', salary:'€120k–€150k', url:'', notes:'OFFER received! Deadline June 15. Comparing with Stripe.' },
+  { id:8, company:'Miro', role:'Full Stack Engineer', status:'ghosted', priority:'low', date:'2026-05-10', location:'Berlin', salary:'€80k–€100k', url:'', notes:'Applied 4 weeks ago, no response.' },
+];
+let nextId = 9;
+let currentFilter = 'all';
+let currentView = 'dashboard';
+let currentCardView = 'card';
+let searchQuery = '';
+let selectedId = null;
+let editingId = null;
+let sortField = null, sortDir = 1;
+
+const STATUS_CONFIG = {
+  wishlist:  { label:'Wishlist',  color:'warning',  icon:'bookmark' },
+  applied:   { label:'Applied',   color:'blue',     icon:'send' },
+  screening: { label:'Screening', color:'gold',     icon:'phone' },
+  interview: { label:'Interview', color:'purple',   icon:'calendar' },
+  offer:     { label:'Offer',     color:'success',  icon:'party-popper' },
+  rejected:  { label:'Rejected', color:'error',    icon:'x-circle' },
+  ghosted:   { label:'Ghosted',  color:'muted',    icon:'ghost' },
+};
+const PRIORITY_LABELS = { high:'High', mid:'Medium', low:'Low' };
+const KANBAN_STAGES = ['wishlist','applied','screening','interview','offer','rejected'];
+
+// ─── THEME ────────────────────────────────────────────────────────────────────
+(function(){
+  const t=document.querySelector('[data-theme-toggle]'),r=document.documentElement;
+  let d=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  r.setAttribute('data-theme',d);
+  t&&t.addEventListener('click',()=>{
+    d=d==='dark'?'light':'dark';
+    r.setAttribute('data-theme',d);
+    t.setAttribute('aria-label','Switch to '+(d==='dark'?'light':'dark')+' mode');
+    t.innerHTML=d==='dark'?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  });
+})();
+
+// ─── VIEWS ────────────────────────────────────────────────────────────────────
+function switchView(v, btn) {
+  currentView = v;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const titleMap = {dashboard:'Dashboard', table:'All Applications', kanban:'Kanban Board'};
+  document.getElementById('header-title').textContent = titleMap[v] || v;
+  document.getElementById('view-dashboard').style.display = v==='dashboard'?'block':'none';
+  document.getElementById('view-table').style.display = v==='table'?'block':'none';
+  document.getElementById('view-kanban').style.display = v==='kanban'?'flex':'none';
+  if(v==='kanban') document.getElementById('view-kanban').classList.add('active');
+  render();
+}
+
+function setCardView(mode) {
+  currentCardView = mode;
+  document.getElementById('vbtn-card').classList.toggle('active', mode==='card');
+  document.getElementById('vbtn-list').classList.toggle('active', mode==='list');
+  renderCards();
+}
+
+// ─── FILTER / SEARCH ──────────────────────────────────────────────────────────
+function setFilter(status, btn, isTable=false) {
+  currentFilter = status;
+  const container = isTable ? btn.closest('.filter-bar') : document.getElementById('filter-bar');
+  container.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function quickFilter(status) {
+  currentFilter = status;
+  switchView('table', null);
+  document.querySelectorAll('#view-table .filter-chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.status === status);
+  });
+  render();
+}
+
+function onSearch() {
+  searchQuery = document.getElementById('search-input').value.toLowerCase();
+  render();
+}
+
+function filteredApps() {
+  return applications.filter(a => {
+    const matchesFilter = currentFilter === 'all' || a.status === currentFilter;
+    const matchesSearch = !searchQuery || a.company.toLowerCase().includes(searchQuery) || a.role.toLowerCase().includes(searchQuery);
+    return matchesFilter && matchesSearch;
+  }).sort((a,b) => {
+    if(!sortField) return 0;
+    const av = (a[sortField]||'').toLowerCase(), bv = (b[sortField]||'').toLowerCase();
+    return av < bv ? -sortDir : av > bv ? sortDir : 0;
+  });
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function render() {
+  renderKPIs();
+  renderReminders();
+  renderSidebarStats();
+  if(currentView === 'dashboard') renderCards();
+  if(currentView === 'table') renderTable();
+  if(currentView === 'kanban') renderKanban();
+  lucide.createIcons();
+  if(typeof saveToStorage === 'function') saveToStorage();
+}
+
+function renderKPIs() {
+  const all = applications;
+  const total = all.length;
+  const active = all.filter(a => ['applied','screening','interview'].includes(a.status)).length;
+  const interviews = all.filter(a => a.status === 'interview').length;
+  const offers = all.filter(a => a.status === 'offer').length;
+  const responseRate = total > 0 ? Math.round((all.filter(a=>a.status!=='wishlist'&&a.status!=='applied').length / Math.max(all.filter(a=>a.status!=='wishlist').length,1)) * 100) : 0;
+
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi-card"><div class="kpi-label">Total Applications</div><div class="kpi-value">${total}</div><div class="kpi-meta">All time</div></div>
+    <div class="kpi-card"><div class="kpi-label">In Progress</div><div class="kpi-value" style="color:var(--color-blue)">${active}</div><div class="kpi-meta">Applied + screening + interview</div></div>
+    <div class="kpi-card"><div class="kpi-label">Interviews</div><div class="kpi-value" style="color:var(--color-purple)">${interviews}</div><div class="kpi-meta">${offers} offer${offers!==1?'s':''} received</div></div>
+    <div class="kpi-card"><div class="kpi-label">Response Rate</div><div class="kpi-value" style="color:var(--color-success)">${responseRate}%</div><div class="kpi-meta">Of submitted apps</div></div>
+  `;
+  document.getElementById('badge-total').textContent = total;
+  document.getElementById('badge-interview').textContent = interviews;
+  document.getElementById('badge-offer').textContent = offers;
+}
+
+function renderSidebarStats() {
+  const byStatus = {};
+  applications.forEach(a => byStatus[a.status] = (byStatus[a.status]||0)+1);
+  const lines = Object.entries(STATUS_CONFIG).map(([k,v]) => byStatus[k] ? `<div class="stat-mini"><span>${v.label}</span><strong>${byStatus[k]}</strong></div>` : '').filter(Boolean).join('');
+  document.getElementById('sidebar-stats').innerHTML = lines;
+}
+
+function renderCards() {
+  const apps = filteredApps();
+  const container = document.getElementById('cards-container');
+  if(apps.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon"><i data-lucide="search-x" width="40" height="40"></i></div><h3>No applications match</h3><p>Try a different filter, or add your first application.</p><button class="btn btn-primary" onclick="openAddModal()"><i data-lucide="plus" width="15" height="15"></i> Add Application</button></div>`;
+    lucide.createIcons(); return;
+  }
+  if(currentCardView === 'list') {
+    container.innerHTML = `<div style="display:flex;flex-direction:column;gap:var(--space-2)">${apps.map(cardListItem).join('')}</div>`;
+  } else {
+    container.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));gap:var(--space-4)">${apps.map(cardGridItem).join('')}</div>`;
+  }
+  lucide.createIcons();
+}
+
+function cardGridItem(a) {
+  const sc = STATUS_CONFIG[a.status] || {};
+  return `<div class="kanban-card" onclick="openDetail(${a.id})" style="cursor:pointer">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-2)">
+      <span class="badge badge-${a.status}">${sc.label||a.status}</span>
+      <span class="priority-dot priority-${a.priority}"></span>
+    </div>
+    <div class="kanban-card-company">${esc(a.company)}</div>
+    <div class="kanban-card-role">${esc(a.role)}</div>
+    <div class="kanban-card-meta">
+      ${a.location ? `<span style="font-size:var(--text-xs);color:var(--color-text-faint)"><i data-lucide="map-pin" width="11" height="11" style="display:inline-block;margin-right:2px"></i>${esc(a.location)}</span>` : ''}
+      ${a.date ? `<span style="font-size:var(--text-xs);color:var(--color-text-faint)">${formatDate(a.date)}</span>` : ''}
+    </div>
+  </div>`;
+}
+
+function cardListItem(a) {
+  const sc = STATUS_CONFIG[a.status] || {};
+  return `<div style="background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h / 0.08);border-radius:var(--radius-md);padding:var(--space-3) var(--space-4);display:flex;align-items:center;gap:var(--space-4);cursor:pointer;transition:box-shadow var(--transition-interactive)" onclick="openDetail(${a.id})" onmouseenter="this.style.boxShadow='var(--shadow-md)'" onmouseleave="this.style.boxShadow=''">
+    <span class="priority-dot priority-${a.priority}"></span>
+    <div style="flex:1;min-width:0">
+      <span style="font-weight:600;font-size:var(--text-sm)">${esc(a.company)}</span>
+      <span style="color:var(--color-text-muted);font-size:var(--text-sm);margin-left:var(--space-2)">${esc(a.role)}</span>
+    </div>
+    ${a.location ? `<span style="font-size:var(--text-xs);color:var(--color-text-faint)">${esc(a.location)}</span>` : ''}
+    ${a.date ? `<span style="font-size:var(--text-xs);color:var(--color-text-faint)">${formatDate(a.date)}</span>` : ''}
+    <span class="badge badge-${a.status}">${sc.label||a.status}</span>
+  </div>`;
+}
+
+function renderTable() {
+  const apps = filteredApps();
+  const tbody = document.getElementById('table-body');
+  const empty = document.getElementById('table-empty');
+  if(apps.length === 0) {
+    tbody.innerHTML = ''; empty.style.display = 'flex'; return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = apps.map(a => {
+    const sc = STATUS_CONFIG[a.status] || {};
+    return `<tr id="tr-${a.id}" onclick="openDetail(${a.id})" style="cursor:pointer;${selectedApps.has(a.id)?'background:var(--color-primary-highlight)':''}">
+      <td onclick="event.stopPropagation()"><input type="checkbox" class="row-cb" onchange="toggleSelect(${a.id}, this.checked)" ${selectedApps.has(a.id)?'checked':''}></td>
+      <td class="td-company">${esc(a.company)}</td>
+      <td class="td-role">${esc(a.role)}</td>
+      <td><span class="badge badge-${a.status}">${sc.label||a.status}</span></td>
+      <td><span style="display:flex;align-items:center;gap:6px"><span class="priority-dot priority-${a.priority}"></span>${PRIORITY_LABELS[a.priority]||a.priority}</span></td>
+      <td class="td-date">${a.date ? formatDate(a.date) : '—'}</td>
+      <td style="font-size:var(--text-xs);color:var(--color-text-muted)">${a.location ? esc(a.location) : '—'}</td>
+      <td style="font-size:var(--text-xs);color:var(--color-text-muted)">${a.salary ? esc(a.salary) : '—'}</td>
+      <td class="td-actions" onclick="event.stopPropagation()">
+        <button onclick="openEditModal(${a.id})" aria-label="Edit"><i data-lucide="pencil" width="14" height="14"></i></button>
+        <button onclick="deleteApp(${a.id})" aria-label="Delete" style="color:var(--color-error)"><i data-lucide="trash-2" width="14" height="14"></i></button>
+      </td>
+    </tr>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+function renderKanban() {
+  const board = document.getElementById('kanban-board');
+  board.style.cssText = 'display:flex;gap:var(--space-4);overflow-x:auto;padding-bottom:var(--space-4);';
+  board.innerHTML = KANBAN_STAGES.map(status => {
+    const sc = STATUS_CONFIG[status];
+    const apps = applications.filter(a => a.status === status && (!searchQuery || a.company.toLowerCase().includes(searchQuery) || a.role.toLowerCase().includes(searchQuery)));
+    return `<div class="kanban-col">
+      <div class="kanban-col-header">
+        <div class="kanban-col-title"><span class="badge badge-${status}">${sc.label}</span></div>
+        <span class="kanban-col-count">${apps.length}</span>
+      </div>
+      <div class="kanban-col-body">
+        ${apps.length === 0 ? `<div style="text-align:center;padding:var(--space-8) var(--space-4);color:var(--color-text-faint);font-size:var(--text-xs)">No applications</div>` : apps.map(a => `
+          <div class="kanban-card" onclick="openDetail(${a.id})">
+            <div class="kanban-card-company">${esc(a.company)}</div>
+            <div class="kanban-card-role">${esc(a.role)}</div>
+            <div class="kanban-card-meta">
+              <span class="priority-dot priority-${a.priority}"></span>
+              ${a.date ? `<span style="font-size:var(--text-xs);color:var(--color-text-faint)">${formatDate(a.date)}</span>` : ''}
+              ${a.salary ? `<span style="font-size:var(--text-xs);color:var(--color-text-faint)">${esc(a.salary)}</span>` : ''}
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+function openAddModal() {
+  editingId = null;
+  document.getElementById('modal-title-text').textContent = 'Add Application';
+  document.getElementById('form-submit-btn').textContent = 'Add Application';
+  document.getElementById('app-form').reset();
+  document.getElementById('f-int-date').value = '';
+  document.getElementById('f-int-time').value = '';
+  document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function openEditModal(id) {
+  editingId = id;
+  const a = applications.find(x => x.id === id);
+  if(!a) return;
+  document.getElementById('modal-title-text').textContent = 'Edit Application';
+  document.getElementById('form-submit-btn').textContent = 'Save Changes';
+  document.getElementById('f-company').value = a.company;
+  document.getElementById('f-role').value = a.role;
+  document.getElementById('f-status').value = a.status;
+  document.getElementById('f-priority').value = a.priority;
+  document.getElementById('f-date').value = a.date || '';
+  document.getElementById('f-location').value = a.location || '';
+  document.getElementById('f-salary').value = a.salary || '';
+  document.getElementById('f-url').value = a.url || '';
+  document.getElementById('f-int-date').value = a.interviewDate || '';
+  document.getElementById('f-int-time').value = a.interviewTime || '';
+  document.getElementById('f-notes').value = a.notes || '';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+function closeModalOnOverlay(e) { if(e.target === document.getElementById('modal-overlay')) closeModal(); }
+
+function submitForm(e) {
+  e.preventDefault();
+  const data = {
+    company: document.getElementById('f-company').value.trim(),
+    role: document.getElementById('f-role').value.trim(),
+    status: document.getElementById('f-status').value,
+    priority: document.getElementById('f-priority').value,
+    date: document.getElementById('f-date').value,
+    location: document.getElementById('f-location').value.trim(),
+    salary: document.getElementById('f-salary').value.trim(),
+    url: document.getElementById('f-url').value.trim(),
+    notes: document.getElementById('f-notes').value.trim(),
+    interviewDate: document.getElementById('f-int-date').value,
+    interviewTime: document.getElementById('f-int-time').value,
+  };
+  if(editingId) {
+    const idx = applications.findIndex(a => a.id === editingId);
+    if(idx > -1) {
+      const old = applications[idx];
+      if(old.interviewDate !== data.interviewDate && data.interviewDate) {
+         if(!old.log) old.log = [];
+         old.log.unshift({time: new Date().toISOString(), text: `Interview scheduled for ${data.interviewDate} ${data.interviewTime||''}`, type: 'interview'});
+      }
+      applications[idx] = { ...old, ...data };
+    }
+    showToast('Changes saved', 'check-circle');
+    if(selectedId === editingId) openDetail(editingId);
+  } else {
+    data.log = [{time: new Date().toISOString(), text: 'Application created', type: 'status'}];
+    if(data.interviewDate) data.log.unshift({time: new Date().toISOString(), text: `Interview scheduled for ${data.interviewDate} ${data.interviewTime||''}`, type: 'interview'});
+    applications.unshift({ id: nextId++, ...data });
+    showToast('Application added', 'check-circle');
+  }
+  closeModal();
+  render();
+}
+
+// ─── DETAIL PANEL ─────────────────────────────────────────────────────────────
+function openDetail(id) {
+  selectedId = id;
+  const a = applications.find(x => x.id === id);
+  if(!a) return;
+  document.getElementById('dp-company').textContent = a.company;
+  document.getElementById('dp-role').textContent = a.role;
+  document.getElementById('dp-badge').innerHTML = `<span class="badge badge-${a.status}" style="margin-top:var(--space-2)">${STATUS_CONFIG[a.status]?.label||a.status}</span>`;
+  document.getElementById('dp-date').textContent = a.date ? formatDate(a.date) : '—';
+  document.getElementById('dp-location').textContent = a.location || '—';
+  document.getElementById('dp-salary').textContent = a.salary || '—';
+  document.getElementById('dp-priority').textContent = PRIORITY_LABELS[a.priority] || a.priority;
+  document.getElementById('dp-notes').value = a.notes || '';
+  renderLog(a);
+  const urlEl = document.getElementById('dp-url');
+  if(a.url) urlEl.innerHTML = `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer" style="color:var(--color-primary)">${esc(a.url.replace(/^https?:\/\//,''))}</a>`;
+  else urlEl.textContent = '—';
+  const changer = document.getElementById('dp-status-changer');
+  changer.innerHTML = Object.entries(STATUS_CONFIG).map(([k,v]) => 
+    `<button class="status-btn status-btn-${k} ${a.status===k?'active':''}" onclick="changeStatus(${id},'${k}')">${v.label}</button>`
+  ).join('');
+  document.getElementById('detail-panel').classList.add('open');
+}
+function closeDetail() {
+  selectedId = null;
+  document.getElementById('detail-panel').classList.remove('open');
+}
+function changeStatus(id, newStatus) {
+  const a = applications.find(x => x.id === id);
+  if(a) {
+    a.status = newStatus;
+    addLog(id, 'Status changed to ' + (STATUS_CONFIG[newStatus]?.label||newStatus), 'status');
+    openDetail(id);
+    render();
+    showToast(`Status → ${STATUS_CONFIG[newStatus]?.label}`, 'refresh-cw');
+  }
+}
+function saveNotes() {
+  if(!selectedId) return;
+  const a = applications.find(x => x.id === selectedId);
+  if(a) a.notes = document.getElementById('dp-notes').value;
+  saveToStorage();
+}
+function editFromDetail() {
+  if(selectedId) openEditModal(selectedId);
+}
+function deleteFromDetail() {
+  if(selectedId) { deleteApp(selectedId); closeDetail(); }
+}
+function deleteApp(id) {
+  applications = applications.filter(a => a.id !== id);
+  if(selectedId === id) closeDetail();
+  showToast('Application removed', 'trash-2');
+  render();
+}
+
+// ─── SORT ─────────────────────────────────────────────────────────────────────
+function sortTable(field) {
+  if(sortField === field) sortDir *= -1;
+  else { sortField = field; sortDir = 1; }
+  render();
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function showToast(msg, icon='info') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<i data-lucide="${icon}" width="16" height="16" style="color:var(--color-primary);flex-shrink:0"></i> ${msg}`;
+  c.appendChild(t);
+  lucide.createIcons({ nodes:[t] });
+  setTimeout(() => { t.style.animation = 'fade-out 0.25s ease forwards'; setTimeout(()=>t.remove(), 260); }, 2400);
+}
+
+// ─── IMPORT / EXPORT ─────────────────────────────────────────────────────────
+let pendingImportData = [];
+const CSV_FIELDS = ['company','role','status','priority','date','location','salary','url','notes','interviewDate','interviewTime'];
+const VALID_STATUSES = new Set(['wishlist','applied','screening','interview','offer','rejected','ghosted']);
+const VALID_PRIORITIES = new Set(['high','mid','low']);
+
+function openIEModal() {
+  pendingImportData = [];
+  document.getElementById('import-preview').style.display = 'none';
+  document.getElementById('import-file-input').value = '';
+  const dz = document.getElementById('drop-zone');
+  dz.style.borderColor = 'var(--color-border)';
+  dz.style.background = 'var(--color-bg)';
+  document.getElementById('ie-modal-overlay').classList.add('open');
+  setTimeout(() => lucide.createIcons(), 50);
+}
+function closeIEModal() { document.getElementById('ie-modal-overlay').classList.remove('open'); }
+function closeIEModalOnOverlay(e) { if(e.target === document.getElementById('ie-modal-overlay')) closeIEModal(); }
+
+function onDragOver(e) {
+  e.preventDefault();
+  const dz = document.getElementById('drop-zone');
+  dz.style.borderColor = 'var(--color-primary)';
+  dz.style.background = 'var(--color-primary-highlight)';
+}
+function onDragLeave() {
+  const dz = document.getElementById('drop-zone');
+  dz.style.borderColor = 'var(--color-border)';
+  dz.style.background = 'var(--color-bg)';
+}
+function onDrop(e) {
+  e.preventDefault();
+  onDragLeave();
+  const file = e.dataTransfer.files[0];
+  if(file) processImportFile(file);
+}
+function handleImportFile(e) {
+  const file = e.target.files[0];
+  if(file) processImportFile(file);
+}
+
+function processImportFile(file) {
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      let parsed = file.name.toLowerCase().endsWith('.json')
+        ? parseImportJSON(ev.target.result)
+        : parseImportCSV(ev.target.result);
+      const existing = new Set(applications.map(a => (a.company + '|' + a.role).toLowerCase()));
+      const newOnes = parsed.filter(a => !existing.has((a.company + '|' + a.role).toLowerCase()));
+      const skipped = parsed.length - newOnes.length;
+      pendingImportData = newOnes;
+      document.getElementById('preview-summary').textContent =
+        newOnes.length > 0
+          ? newOnes.length + ' application' + (newOnes.length !== 1 ? 's' : '') + ' ready to import'
+          : 'All entries already exist — nothing new to import';
+      document.getElementById('preview-detail').textContent =
+        (parsed.length + ' total parsed from ' + file.name) +
+        (skipped > 0 ? ' · ' + skipped + ' duplicate' + (skipped !== 1 ? 's' : '') + ' skipped' : '');
+      const btn = document.getElementById('confirm-import-btn');
+      btn.disabled = newOnes.length === 0;
+      btn.style.opacity = newOnes.length === 0 ? '0.45' : '1';
+      document.getElementById('import-preview').style.display = 'block';
+      lucide.createIcons();
+    } catch(err) {
+      showToast('Parse error: ' + err.message, 'alert-circle');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function parseCSVRow(line) {
+  const result = []; let cur = ''; let inQ = false;
+  for(let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if(ch === '"') { if(inQ && line[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
+    else if(ch === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
+    else cur += ch;
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+function parseImportCSV(text) {
+  const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
+  if(lines.length < 2) throw new Error('File needs a header row and at least one data row');
+  const headers = parseCSVRow(lines[0].toLowerCase());
+  const fieldIdx = {};
+  CSV_FIELDS.forEach(f => { const i = headers.indexOf(f); if(i > -1) fieldIdx[f] = i; });
+  if(fieldIdx.company === undefined || fieldIdx.role === undefined)
+    throw new Error('CSV must have "company" and "role" columns');
+  return lines.slice(1).map(line => {
+    const cols = parseCSVRow(line);
+    const get = f => (fieldIdx[f] !== undefined ? (cols[fieldIdx[f]] || '') : '').trim();
+    const status = get('status'); const priority = get('priority');
+    return {
+      id: nextId++,
+      company: get('company'), role: get('role'),
+      status: VALID_STATUSES.has(status) ? status : 'applied',
+      priority: VALID_PRIORITIES.has(priority) ? priority : 'mid',
+      date: get('date'), location: get('location'),
+      salary: get('salary'), url: get('url'), notes: get('notes'), interviewDate: get('interviewDate'), interviewTime: get('interviewTime'),
+    };
+  }).filter(a => a.company && a.role);
+}
+
+function parseImportJSON(text) {
+  const data = JSON.parse(text);
+  const arr = Array.isArray(data) ? data : (data.applications || data.data || []);
+  if(!Array.isArray(arr)) throw new Error('JSON must be an array of objects');
+  return arr.map(a => ({
+    id: nextId++,
+    company: String(a.company || '').trim(),
+    role: String(a.role || '').trim(),
+    status: VALID_STATUSES.has(a.status) ? a.status : 'applied',
+    priority: VALID_PRIORITIES.has(a.priority) ? a.priority : 'mid',
+    date: String(a.date || '').trim(),
+    location: String(a.location || '').trim(),
+    salary: String(a.salary || '').trim(),
+    url: String(a.url || '').trim(),
+    notes: String(a.notes || '').trim(),
+    interviewDate: String(a.interviewDate || '').trim(),
+    interviewTime: String(a.interviewTime || '').trim(),
+  })).filter(a => a.company && a.role);
+}
+
+function confirmImport() {
+  if(!pendingImportData.length) return;
+  const count = pendingImportData.length;
+  applications = [...pendingImportData, ...applications];
+  pendingImportData = [];
+  closeIEModal();
+  showToast(count + ' application' + (count !== 1 ? 's' : '') + ' imported', 'check-circle');
+  render();
+}
+
+function escCSV(v) {
+  const s = String(v || '');
+  return (s.includes(',') || s.includes('"') || s.includes('\n')) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function exportCSV() {
+  const rows = [CSV_FIELDS.join(',')];
+  applications.forEach(a => rows.push(CSV_FIELDS.map(f => escCSV(a[f])).join(',')));
+  downloadBlob(new Blob([rows.join('\n')], {type:'text/csv;charset=utf-8'}), 'job-applications.csv');
+  showToast('CSV downloaded', 'download');
+}
+
+function exportJSON() {
+  const clean = applications.map(({id, ...rest}) => rest);
+  downloadBlob(new Blob([JSON.stringify(clean, null, 2)], {type:'application/json'}), 'job-applications.json');
+  showToast('JSON downloaded', 'download');
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 150);
+}
+
+// ─── UTILS ────────────────────────────────────────────────────────────────────
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function formatDate(d) {
+  if(!d) return '—';
+  const dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+}
+
+// ─── KEYBOARD ─────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') { closeModal(); closeDetail(); closeIEModal(); closeSettings(); closeConfirm(); }
+  if((e.metaKey||e.ctrlKey) && e.key === 'k') { e.preventDefault(); document.getElementById('search-input').focus(); }
+});
+
+
+// ═══════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════
+
+// ── Column config ──────────────────────────────────────
+let columnConfig = {
+  status:   { label:'Status',    visible:true,  required:false },
+  priority: { label:'Priority',  visible:true,  required:false },
+  date:     { label:'Date Applied', visible:true, required:false },
+  location: { label:'Location',  visible:true,  required:false },
+  salary:   { label:'Salary',    visible:true,  required:false },
+  url:      { label:'Job URL',   visible:true,  required:false },
+  notes:    { label:'Notes',     visible:true,  required:false },
+};
+let customColumns = []; // [{key, label}]
+
+// ── Status config ──────────────────────────────────────
+let statusConfig = {
+  wishlist:  { label:'Wishlist',  visible:true,  custom:false },
+  applied:   { label:'Applied',   visible:true,  custom:false },
+  screening: { label:'Screening', visible:true,  custom:false },
+  interview: { label:'Interview', visible:true,  custom:false },
+  offer:     { label:'Offer',     visible:true,  custom:false },
+  rejected:  { label:'Rejected',  visible:true,  custom:false },
+  ghosted:   { label:'Ghosted',   visible:true,  custom:false },
+};
+
+// ── Backup history ─────────────────────────────────────
+let backupHistory = [];
+let gdriveConnected = false;
+let confirmCallback = null;
+
+// ── Open / close ───────────────────────────────────────
+function openSettings() {
+  const overlay = document.getElementById('settings-overlay');
+  const panel   = document.getElementById('settings-panel');
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => { panel.style.transform = 'translateX(0)'; });
+  renderSettingsColumns();
+  renderSettingsStatuses();
+  renderDataSummary();
+  renderBackupHistory();
+  switchSettingsTab('columns', document.querySelector('.stab[data-tab="columns"]'));
+  setTimeout(() => lucide.createIcons(), 60);
+}
+function closeSettings() {
+  const panel = document.getElementById('settings-panel');
+  panel.style.transform = 'translateX(100%)';
+  setTimeout(() => { document.getElementById('settings-overlay').style.display = 'none'; }, 290);
+}
+function closeSettingsOnOverlay(e) {
+  if(e.target === document.getElementById('settings-overlay')) closeSettings();
+}
+
+// ── Tabs ───────────────────────────────────────────────
+function switchSettingsTab(tab, btn) {
+  document.querySelectorAll('.stab-panel').forEach(p => p.style.display = 'none');
+  document.getElementById('stab-' + tab).style.display = 'block';
+  document.querySelectorAll('.stab').forEach(b => {
+    b.style.color = 'var(--color-text-muted)';
+    b.style.borderBottomColor = 'transparent';
+  });
+  if(btn) {
+    btn.style.color = tab === 'danger' ? 'var(--color-error)' : 'var(--color-primary)';
+    btn.style.borderBottomColor = tab === 'danger' ? 'var(--color-error)' : 'var(--color-primary)';
+  }
+  setTimeout(() => lucide.createIcons(), 40);
+}
+
+// ── Columns ────────────────────────────────────────────
+function renderSettingsColumns() {
+  const list = document.getElementById('columns-list');
+  list.innerHTML = Object.entries(columnConfig).map(([key, cfg]) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;background:var(--color-surface-2);border:1px solid oklch(from var(--color-text) l c h/0.07);border-radius:var(--radius-md);padding:var(--space-3) var(--space-4)">
+      <div style="display:flex;align-items:center;gap:var(--space-3)">
+        <i data-lucide="grip-vertical" width="14" height="14" style="color:var(--color-text-faint)"></i>
+        <span style="font-size:var(--text-sm);font-weight:500;color:var(--color-text)">${cfg.label}</span>
+      </div>
+      <label style="display:flex;align-items:center;gap:var(--space-2);cursor:pointer;font-size:var(--text-xs);color:var(--color-text-muted);text-transform:none;letter-spacing:0;font-weight:400">
+        <span>${cfg.visible ? 'Visible' : 'Hidden'}</span>
+        <div class="toggle ${cfg.visible ? 'on' : ''}" onclick="toggleColumn('${key}')" style="width:36px;height:20px;border-radius:var(--radius-full);background:${cfg.visible ? 'var(--color-primary)' : 'var(--color-surface-dynamic)'};position:relative;cursor:pointer;transition:background var(--transition-interactive);flex-shrink:0">
+          <div style="position:absolute;top:2px;left:${cfg.visible ? '18px' : '2px'};width:16px;height:16px;border-radius:50%;background:white;transition:left var(--transition-interactive);box-shadow:var(--shadow-sm)"></div>
+        </div>
+      </label>
+    </div>`).join('');
+
+  // Custom columns
+  const custom = document.getElementById('custom-cols-list');
+  custom.innerHTML = customColumns.map((col, i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;background:var(--color-primary-highlight);border:1px solid var(--color-primary);border-radius:var(--radius-md);padding:var(--space-3) var(--space-4)">
+      <span style="font-size:var(--text-sm);font-weight:500;color:var(--color-primary)">${col.label}</span>
+      <button onclick="removeCustomColumn(${i})" style="color:var(--color-primary);background:none;border:none;cursor:pointer;display:flex;padding:var(--space-1);border-radius:var(--radius-sm)" aria-label="Remove column">
+        <i data-lucide="x" width="14" height="14"></i>
+      </button>
+    </div>`).join('');
+  lucide.createIcons();
+}
+
+function toggleColumn(key) {
+  columnConfig[key].visible = !columnConfig[key].visible;
+  renderSettingsColumns();
+  render();
+}
+
+function addCustomColumn() {
+  const input = document.getElementById('new-col-name');
+  const label = input.value.trim();
+  if(!label) return;
+  const key = 'custom_' + label.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
+  if(customColumns.find(c => c.key === key)) { showToast('Column already exists', 'alert-circle'); return; }
+  customColumns.push({ key, label });
+  // Add field to all existing apps
+  applications.forEach(a => { if(a[key] === undefined) a[key] = ''; });
+  input.value = '';
+  renderSettingsColumns();
+  // Add field to the form
+  injectCustomFieldsInForm();
+  showToast(`"${label}" column added`, 'check-circle');
+}
+
+function removeCustomColumn(i) {
+  const col = customColumns[i];
+  customColumns.splice(i, 1);
+  applications.forEach(a => delete a[col.key]);
+  renderSettingsColumns();
+  injectCustomFieldsInForm();
+  showToast(`"${col.label}" column removed`, 'trash-2');
+  render();
+}
+
+function injectCustomFieldsInForm() {
+  const existing = document.getElementById('custom-form-fields');
+  if(existing) existing.remove();
+  if(!customColumns.length) return;
+  const wrapper = document.createElement('div');
+  wrapper.id = 'custom-form-fields';
+  wrapper.className = 'form-group full';
+  wrapper.style.gridColumn = '1 / -1';
+  wrapper.innerHTML = customColumns.map(col => `
+    <div class="form-group" style="margin-bottom:var(--space-3)">
+      <label for="f-${col.key}">${col.label}</label>
+      <input type="text" id="f-${col.key}" placeholder="${col.label}…">
+    </div>`).join('');
+  const footer = document.querySelector('.modal-footer');
+  if(footer) footer.parentNode.insertBefore(wrapper, footer);
+}
+
+// ── Statuses ───────────────────────────────────────────
+function renderSettingsStatuses() {
+  const list = document.getElementById('statuses-list');
+  const activeCount = Object.values(statusConfig).filter(s => s.visible).length;
+  list.innerHTML = Object.entries(statusConfig).map(([key, cfg]) => `
+    <div style="display:flex;align-items:center;gap:var(--space-3);background:var(--color-surface-2);border:1px solid oklch(from var(--color-text) l c h/0.07);border-radius:var(--radius-md);padding:var(--space-3) var(--space-4)">
+      <span class="badge badge-${key}" style="flex-shrink:0;min-width:80px;justify-content:center">${cfg.label}</span>
+      <input type="text" value="${cfg.label}"
+        onchange="renameStatus('${key}', this.value)"
+        style="flex:1;background:var(--color-bg);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-1) var(--space-3);font-size:var(--text-sm);color:var(--color-text)">
+      <div class="toggle ${cfg.visible ? 'on' : ''}" onclick="toggleStatus('${key}')"
+        title="${activeCount <= 2 && cfg.visible ? 'Cannot hide — minimum 2 required' : ''}"
+        style="width:36px;height:20px;border-radius:var(--radius-full);background:${cfg.visible ? 'var(--color-primary)' : 'var(--color-surface-dynamic)'};position:relative;cursor:pointer;transition:background var(--transition-interactive);flex-shrink:0;${activeCount <= 2 && cfg.visible ? 'opacity:0.4;cursor:not-allowed' : ''}">
+        <div style="position:absolute;top:2px;left:${cfg.visible ? '18px' : '2px'};width:16px;height:16px;border-radius:50%;background:white;transition:left var(--transition-interactive);box-shadow:var(--shadow-sm)"></div>
+      </div>
+      ${cfg.custom ? `<button onclick="removeCustomStatus('${key}')" style="color:var(--color-error);background:none;border:none;cursor:pointer;display:flex;padding:var(--space-1);border-radius:var(--radius-sm)"><i data-lucide="x" width="14" height="14"></i></button>` : ''}
+    </div>`).join('');
+  lucide.createIcons();
+}
+
+function toggleStatus(key) {
+  const activeCount = Object.values(statusConfig).filter(s => s.visible).length;
+  if(statusConfig[key].visible && activeCount <= 2) { showToast('At least 2 statuses must be active', 'alert-circle'); return; }
+  statusConfig[key].visible = !statusConfig[key].visible;
+  renderSettingsStatuses();
+  render();
+}
+
+function renameStatus(key, newLabel) {
+  if(!newLabel.trim()) return;
+  statusConfig[key].label = newLabel.trim();
+  // Update STATUS_CONFIG used by the rest of the app
+  if(STATUS_CONFIG[key]) STATUS_CONFIG[key].label = newLabel.trim();
+  renderSettingsStatuses();
+  render();
+}
+
+function addCustomStatus() {
+  const input = document.getElementById('new-status-name');
+  const label = input.value.trim();
+  if(!label) return;
+  const key = 'custom_' + label.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
+  if(statusConfig[key]) { showToast('Status already exists', 'alert-circle'); return; }
+  statusConfig[key] = { label, visible:true, custom:true };
+  STATUS_CONFIG[key] = { label, color:'muted', icon:'circle' };
+  VALID_STATUSES.add(key);
+  // Add CSS class dynamically
+  injectStatusCSS(key);
+  input.value = '';
+  renderSettingsStatuses();
+  render();
+  showToast(`"${label}" status added`, 'check-circle');
+}
+
+function removeCustomStatus(key) {
+  const label = statusConfig[key].label;
+  const count = applications.filter(a => a.status === key).length;
+  if(count > 0) {
+    showConfirm(
+      `Remove "${label}"?`,
+      `${count} application${count!==1?'s':''} use this status. They will be set to "applied".`,
+      () => {
+        applications.forEach(a => { if(a.status === key) a.status = 'applied'; });
+        _doRemoveStatus(key, label);
+      },
+      'var(--color-error)'
+    );
+  } else {
+    _doRemoveStatus(key, label);
+  }
+}
+function _doRemoveStatus(key, label) {
+  delete statusConfig[key];
+  delete STATUS_CONFIG[key];
+  VALID_STATUSES.delete(key);
+  renderSettingsStatuses();
+  render();
+  showToast(`"${label}" status removed`, 'trash-2');
+}
+
+function injectStatusCSS(key) {
+  const style = document.createElement('style');
+  style.textContent = `.badge-${key}{background:var(--color-surface-dynamic);color:var(--color-text-muted)}.status-btn-${key}{background:var(--color-surface-dynamic);color:var(--color-text-muted);border-color:var(--color-border)}`;
+  document.head.appendChild(style);
+}
+
+// ── Google Drive (OAuth flow) ───────────────────────────
+const GDRIVE_CLIENT_ID = ''; // User must supply their own
+function connectGoogleDrive() {
+  // Show setup instructions since client ID needs to be configured
+  const infoEl = document.getElementById('gdrive-info');
+  infoEl.style.display = 'block';
+  infoEl.innerHTML = `
+    <strong style="color:var(--color-text)">Setup required:</strong><br><br>
+    To enable Google Drive backup, you need a Google OAuth Client ID:<br><br>
+    1. Go to <a href="https://console.cloud.google.com/" target="_blank" rel="noopener" style="color:var(--color-primary)">Google Cloud Console</a><br>
+    2. Create a project → Enable Drive API<br>
+    3. Create OAuth 2.0 credentials (Web App)<br>
+    4. Add your Client ID below and click Connect<br><br>
+    <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2)">
+      <input type="text" id="gdrive-client-id-input" placeholder="Paste your Client ID here…"
+        style="flex:1;background:var(--color-bg);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);font-size:var(--text-xs);color:var(--color-text)">
+      <button class="btn btn-primary" onclick="doGDriveConnect()" style="flex-shrink:0;font-size:var(--text-xs)">Connect</button>
+    </div>`;
+}
+
+function doGDriveConnect() {
+  const clientId = document.getElementById('gdrive-client-id-input')?.value.trim();
+  if(!clientId) { showToast('Please enter your Client ID', 'alert-circle'); return; }
+  const redirect = encodeURIComponent(window.location.href.split('?')[0]);
+  const scope = encodeURIComponent('https://www.googleapis.com/auth/drive.file');
+  const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${redirect}&response_type=token&scope=${scope}`;
+  window.open(url, '_blank', 'width=500,height=600');
+  showToast('Google OAuth window opened', 'external-link');
+  // Listen for token in URL hash (implicit flow)
+  const check = setInterval(() => {
+    const hash = window.location.hash;
+    if(hash.includes('access_token')) {
+      const token = new URLSearchParams(hash.slice(1)).get('access_token');
+      if(token) { handleGDriveToken(token); clearInterval(check); }
+    }
+  }, 1000);
+}
+
+function handleGDriveToken(token) {
+  gdriveConnected = true;
+  window._gdriveToken = token;
+  document.getElementById('gdrive-status').textContent = 'Connected ✓';
+  document.getElementById('gdrive-status').style.color = 'var(--color-success)';
+  document.getElementById('gdrive-connect-btn').textContent = '✓ Connected';
+  document.getElementById('gdrive-connect-btn').disabled = true;
+  document.getElementById('gdrive-backup-btn').disabled = false;
+  document.getElementById('gdrive-backup-btn').style.opacity = '1';
+  showToast('Google Drive connected!', 'check-circle');
+}
+
+function backupToDrive() {
+  if(!gdriveConnected || !window._gdriveToken) { showToast('Connect Google Drive first', 'alert-circle'); return; }
+  const data = JSON.stringify(applications.map(({id,...r})=>r), null, 2);
+  const now = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+  const filename = `jobtrack-backup-${now}.json`;
+  const meta = JSON.stringify({name: filename, parents:[]});
+  const form = new FormData();
+  form.append('metadata', new Blob([meta], {type:'application/json'}));
+  form.append('file', new Blob([data], {type:'application/json'}));
+  fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+    method:'POST',
+    headers:{ Authorization: 'Bearer ' + window._gdriveToken },
+    body: form
+  }).then(r => r.json()).then(res => {
+    if(res.id) {
+      logBackup('Google Drive');
+      showToast('Backed up to Google Drive ✓', 'cloud-upload');
+    } else {
+      showToast('Drive upload failed: ' + (res.error?.message || 'unknown'), 'alert-circle');
+    }
+  }).catch(() => showToast('Drive upload failed — check connection', 'alert-circle'));
+}
+
+// ── Backup history ─────────────────────────────────────
+function logBackup(dest) {
+  dest = dest || 'Local file';
+  backupHistory.unshift({ time: new Date().toLocaleString(), dest, count: applications.length });
+  if(backupHistory.length > 5) backupHistory.length = 5;
+  renderBackupHistory();
+}
+function renderBackupHistory() {
+  const el = document.getElementById('backup-history');
+  if(!el) return;
+  if(!backupHistory.length) { el.textContent = 'No backups yet.'; return; }
+  el.innerHTML = backupHistory.map(b => `
+    <div style="display:flex;justify-content:space-between;padding:var(--space-2) 0;border-bottom:1px solid var(--color-divider);font-size:var(--text-xs)">
+      <span style="color:var(--color-text-muted)">${b.time}</span>
+      <span style="color:var(--color-text-faint)">${b.dest} · ${b.count} apps</span>
+    </div>`).join('');
+}
+function saveBackupSchedule() { /* in-memory only */ }
+
+// ── Data / Danger ──────────────────────────────────────
+function renderDataSummary() {
+  const el = document.getElementById('data-summary');
+  if(!el) return;
+  const byStatus = {};
+  applications.forEach(a => byStatus[a.status] = (byStatus[a.status]||0)+1);
+  const topStatus = Object.entries(byStatus).sort((a,b)=>b[1]-a[1])[0];
+  el.innerHTML = [
+    ['Total Applications', applications.length],
+    ['Active Pipeline', applications.filter(a=>['applied','screening','interview'].includes(a.status)).length],
+    ['Offers Received', applications.filter(a=>a.status==='offer').length],
+    ['Most Common Status', topStatus ? (STATUS_CONFIG[topStatus[0]]?.label || topStatus[0]) + ' (' + topStatus[1] + ')' : '—'],
+  ].map(([label, val]) => `
+    <div style="background:var(--color-surface-offset);border-radius:var(--radius-md);padding:var(--space-3)">
+      <div style="font-size:var(--text-xs);color:var(--color-text-faint);margin-bottom:4px">${label}</div>
+      <div style="font-size:var(--text-base);font-weight:700;color:var(--color-text);font-variant-numeric:tabular-nums">${val}</div>
+    </div>`).join('');
+}
+
+function clearClosedApps() {
+  const count = applications.filter(a => ['rejected','ghosted'].includes(a.status)).length;
+  if(count === 0) { showToast('No rejected or ghosted applications to archive', 'info'); return; }
+  showConfirm(
+    'Archive closed applications?',
+    `This will permanently remove ${count} rejected/ghosted application${count!==1?'s':''}. Export a backup first if needed.`,
+    () => {
+      applications = applications.filter(a => !['rejected','ghosted'].includes(a.status));
+      render(); renderDataSummary();
+      showToast(`${count} application${count!==1?'s':''} archived`, 'archive');
+    },
+    'var(--color-warning)'
+  );
+}
+
+const SAMPLE_DATA = [
+  { id:1, company:'Stripe', role:'Senior Frontend Engineer', status:'interview', priority:'high', date:'2026-05-28', location:'Berlin / Remote', salary:'€90k–€120k', url:'https://stripe.com/jobs', notes:'3rd round. System design next. Contact: Sarah K.', interviewDate: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0], interviewTime: '14:30', log: [{time: new Date().toISOString(), text: 'Scheduled system design round', type: 'interview'}, {time: new Date(new Date().setDate(new Date().getDate() - 10)).toISOString(), text: 'Status changed to Interview', type: 'status'}] },
+  { id:2, company:'Vercel', role:'Developer Relations Engineer', status:'screening', priority:'high', date:'2026-06-01', location:'Remote', salary:'€85k–€100k', url:'', notes:'Initial call with recruiter went well.' },
+  { id:3, company:'Linear', role:'Product Designer', status:'applied', priority:'mid', date:'2026-06-03', location:'Remote', salary:'€75k–€95k', url:'', notes:'' },
+  { id:4, company:'Notion', role:'Software Engineer', status:'applied', priority:'mid', date:'2026-06-05', location:'San Francisco / Remote', salary:'$130k–$180k', url:'', notes:'Applied via referral from Alex.' },
+  { id:5, company:'Figma', role:'Engineering Manager', status:'wishlist', priority:'high', date:'', location:'Berlin', salary:'€110k–€140k', url:'', notes:'Dream job. Watch for openings.' },
+  { id:6, company:'GitLab', role:'Backend Engineer (Ruby)', status:'rejected', priority:'low', date:'2026-05-15', location:'Remote', salary:'€70k–€90k', url:'', notes:'Rejected after technical screen.' },
+  { id:7, company:'Shopify', role:'Staff Engineer', status:'offer', priority:'high', date:'2026-05-20', location:'Remote', salary:'€120k–€150k', url:'', notes:'OFFER received! Deadline June 15. Comparing with Stripe.' },
+  { id:8, company:'Miro', role:'Full Stack Engineer', status:'ghosted', priority:'low', date:'2026-05-10', location:'Berlin', salary:'€80k–€100k', url:'', notes:'Applied 4 weeks ago, no response.' },
+];
+
+function resetToSampleData() {
+  showConfirm(
+    'Reset to sample data?',
+    'All your current applications will be permanently deleted and replaced with the sample data set.',
+    () => {
+      applications = SAMPLE_DATA.map(a => ({...a}));
+      nextId = 9;
+      render(); renderDataSummary();
+      showToast('Reset to sample data', 'rotate-ccw');
+    },
+    'var(--color-warning)'
+  );
+}
+
+function clearAllData() {
+  showConfirm(
+    'Delete ALL applications?',
+    'This is permanent and cannot be undone. Please export a backup before proceeding.',
+    () => {
+      applications = []; nextId = 1;
+      render(); renderDataSummary();
+      showToast('All applications deleted', 'trash-2');
+    },
+    'var(--color-error)'
+  );
+}
+
+// ── Auto-ghost stale ──────────────────────────────────────────────────────────
+function getGhostDays() {
+  const val = parseInt(document.getElementById('ghost-days-input') ? document.getElementById('ghost-days-input').value : '60', 10);
+  return isNaN(val) || val < 1 ? 60 : val;
+}
+
+function getStaleApplied(days) {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  return applications.filter(function(a) {
+    if(a.status !== 'applied') return false;
+    if(!a.date) return false;
+    const applied = new Date(a.date + 'T00:00:00');
+    return applied <= cutoff;
+  });
+}
+
+function previewAutoGhost() {
+  const days = getGhostDays();
+  const stale = getStaleApplied(days);
+  const el = document.getElementById('ghost-preview');
+  if(!el) return;
+  if(stale.length === 0) {
+    el.innerHTML = '<span style="color:var(--color-success)">\u2713 No stale applications found for this threshold.</span>';
+  } else {
+    const names = stale.slice(0,3).map(function(a){return a.company;}).join(', ') + (stale.length > 3 ? '\u2026' : '');
+    el.innerHTML = '<span style="color:var(--color-warning)">\u26a0 ' + stale.length + ' application' + (stale.length !== 1 ? 's' : '') + ' would be marked as ghosted: <em>' + names + '</em></span>';
+  }
+}
+
+function autoGhostStale() {
+  const days = getGhostDays();
+  const stale = getStaleApplied(days);
+  if(stale.length === 0) {
+    showToast('No stale applications found for this threshold', 'check-circle');
+    return;
+  }
+  const names = stale.slice(0,3).map(function(a){return a.company;}).join(', ') + (stale.length > 3 ? ' +' + (stale.length - 3) + ' more' : '');
+  showConfirm(
+    'Mark ' + stale.length + ' application' + (stale.length !== 1 ? 's' : '') + ' as Ghosted?',
+    'Applied more than ' + days + ' day' + (days !== 1 ? 's' : '') + ' ago with no update: ' + names + '. You can undo this by manually changing their status back.',
+    function() {
+      stale.forEach(function(a) { a.status = 'ghosted'; });
+      render();
+      renderDataSummary();
+      var el = document.getElementById('ghost-preview');
+      if(el) el.innerHTML = '<span style="color:var(--color-success)">\u2713 No stale applications found for this threshold.</span>';
+      showToast(stale.length + ' application' + (stale.length !== 1 ? 's' : '') + ' marked as ghosted', 'ghost');
+    },
+    'var(--color-primary)'
+  );
+}
+
+// ── Confirm dialog ─────────────────────────────────────
+function showConfirm(title, message, onOk, btnColor) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-message').textContent = message;
+  const btn = document.getElementById('confirm-ok-btn');
+  btn.textContent = 'Confirm';
+  btn.style.background = btnColor || 'var(--color-primary)';
+  btn.style.color = 'white';
+  btn.style.borderColor = btnColor || 'var(--color-primary)';
+  confirmCallback = onOk;
+  document.getElementById('confirm-dialog').style.display = 'flex';
+}
+function executeConfirm() {
+  closeConfirm();
+  if(confirmCallback) { confirmCallback(); confirmCallback = null; }
+}
+function closeConfirm() { document.getElementById('confirm-dialog').style.display = 'none'; }
+
+
+// ─── NEW FEATURES (BULK, LOG, REMINDERS) ────────────────────────────────────
+let selectedApps = new Set();
+
+function toggleSelect(id, checked) {
+  if(checked) selectedApps.add(id); else selectedApps.delete(id);
+  updateBulkBar();
+  const tr = document.getElementById('tr-'+id);
+  if(tr) tr.style.background = checked ? 'var(--color-primary-highlight)' : '';
+}
+function toggleAllSelect(checked) {
+  const apps = filteredApps();
+  if(checked) apps.forEach(a => selectedApps.add(a.id)); else selectedApps.clear();
+  renderTable(); updateBulkBar();
+}
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-action-bar');
+  const count = document.getElementById('bulk-count');
+  if(!bar || !count) return;
+  if(selectedApps.size > 0) {
+    count.textContent = selectedApps.size;
+    bar.classList.add('visible');
+  } else {
+    bar.classList.remove('visible');
+    const cb = document.getElementById('selectAll-cb');
+    if(cb) cb.checked = false;
+  }
+}
+function clearSelection() {
+  selectedApps.clear();
+  renderTable(); updateBulkBar();
+}
+function bulkChangeStatus(status) {
+  if(!status) return;
+  selectedApps.forEach(id => {
+    const a = applications.find(x => x.id === id);
+    if(a) { a.status = status; addLog(id, 'Bulk status changed to ' + (STATUS_CONFIG[status]?.label||status), 'status'); }
+  });
+  showToast(selectedApps.size + ' updated to ' + (STATUS_CONFIG[status]?.label||status), 'check-circle');
+  document.getElementById('bulk-status').value = '';
+  clearSelection(); render();
+}
+function bulkDelete() {
+  showConfirm(`Delete ${selectedApps.size} applications?`, `This cannot be undone.`, () => {
+    applications = applications.filter(a => !selectedApps.has(a.id));
+    showToast(selectedApps.size + ' applications deleted', 'trash-2');
+    clearSelection(); render(); renderDataSummary();
+  }, 'var(--color-error)');
+}
+
+function addLog(appId, text, type='note') {
+  const a = applications.find(x => x.id === appId);
+  if(!a) return;
+  if(!a.log) a.log = [];
+  a.log.unshift({ time: new Date().toISOString(), text, type });
+}
+function renderLog(app) {
+  const el = document.getElementById('dp-log');
+  if(!el) return;
+  if(!app.log || app.log.length === 0) { el.innerHTML = '<div style="color:var(--color-text-faint);font-size:var(--text-xs)">No logs yet.</div>'; return; }
+  el.innerHTML = app.log.map(l => {
+    let icon = 'hash', color = 'var(--color-primary)';
+    if(l.type === 'status') { icon = 'refresh-cw'; color = 'var(--color-blue)'; }
+    if(l.type === 'interview') { icon = 'calendar'; color = 'var(--color-purple)'; }
+    const dt = new Date(l.time);
+    return `<div class="timeline-item">
+      <div class="timeline-icon" style="background:${color}"><i data-lucide="${icon}" width="8" height="8" style="color:white;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"></i></div>
+      <div class="timeline-content">
+        <div class="timeline-date">${dt.toLocaleDateString('en-GB', {day:'numeric',month:'short'})} ${dt.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+        ${esc(l.text)}
+      </div>
+    </div>`;
+  }).join('');
+  lucide.createIcons({nodes:Array.from(el.children)});
+}
+function promptAddLog() {
+  if(!selectedId) return;
+  const text = prompt('Add a log note:');
+  if(text && text.trim()) {
+    addLog(selectedId, text.trim(), 'note');
+    renderLog(applications.find(x=>x.id===selectedId));
+  }
+}
+
+function renderReminders() {
+  const container = document.getElementById('dashboard-reminders');
+  if(!container) return;
+  const todayStr = new Date().toISOString().split('T')[0];
+  const today = new Date(todayStr);
+  const upcoming = applications.filter(a => a.interviewDate && ['applied','screening','interview'].includes(a.status)).map(a => {
+    const d = new Date(a.interviewDate);
+    const diffTime = d - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return { ...a, diffDays };
+  }).filter(a => a.diffDays >= -1 && a.diffDays <= 7).sort((a,b) => a.diffDays - b.diffDays);
+
+  if(upcoming.length === 0) { container.innerHTML = ''; return; }
+  container.innerHTML = upcoming.map(a => {
+    let cls = '', text = '';
+    if(a.diffDays < 0) { cls = 'urgent'; text = `Overdue: Interview was yesterday`; }
+    else if(a.diffDays === 0) { cls = 'urgent'; text = `Today: Interview at ${a.interviewTime||'TBD'}`; }
+    else if(a.diffDays === 1) { cls = 'warning'; text = `Tomorrow: Interview at ${a.interviewTime||'TBD'}`; }
+    else { text = `Upcoming: Interview in ${a.diffDays} days (${formatDate(a.interviewDate)})`; }
+    return `<div class="reminder-card ${cls}" onclick="openDetail(${a.id})">
+      <i data-lucide="calendar-clock" width="18" height="18" style="flex-shrink:0;color:currentColor"></i>
+      <div>
+        <strong style="color:var(--color-text)">${esc(a.company)}</strong> — ${esc(a.role)}<br>
+        <span style="font-size:var(--text-xs);color:currentColor;opacity:0.85">${text}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+
+// ─── SAVE / LOAD FILE ────────────────────────────────────────────────────────
+function buildSavePayload() {
+  return {
+    version: 1,
+    savedAt: new Date().toISOString(),
+    nextId,
+    applications,
+    settings: {
+      statuses: typeof customStatuses !== 'undefined' ? customStatuses : null,
+    }
+  };
+}
+
+function saveFile() {
+  const payload = buildSavePayload();
+  const json = JSON.stringify(payload, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const a = document.createElement('a');
+  const dateStr = new Date().toISOString().slice(0,10);
+  a.href = URL.createObjectURL(blob);
+  a.download = `job-tracker-${dateStr}.jat`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+  // Flash save button
+  const btn = document.getElementById('save-btn');
+  if(btn) {
+    btn.style.color = 'var(--color-success)';
+    btn.innerHTML = '<i data-lucide="check" width="15" height="15"></i> <span>Saved!</span>';
+    lucide.createIcons({nodes:[btn]});
+    setTimeout(() => {
+      btn.style.color = '';
+      btn.innerHTML = '<i data-lucide="save" width="15" height="15"></i> <span>Save</span>';
+      lucide.createIcons({nodes:[btn]});
+    }, 2000);
+  }
+  showToast('Saved as job-tracker-' + dateStr + '.jat', 'save');
+}
+
+function triggerLoad() {
+  document.getElementById('load-file-input').click();
+}
+
+function loadFile(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const payload = JSON.parse(ev.target.result);
+      if(!payload.applications || !Array.isArray(payload.applications)) {
+        showToast('Invalid save file', 'alert-circle'); return;
+      }
+      showConfirm(
+        'Load save file?',
+        `This will replace all current data with ${payload.applications.length} application${payload.applications.length !== 1 ? 's' : ''} from the save file (saved ${payload.savedAt ? new Date(payload.savedAt).toLocaleString() : 'unknown'}).`,
+        () => {
+          applications = payload.applications;
+          nextId = payload.nextId || (Math.max(0, ...payload.applications.map(a => a.id||0)) + 1);
+          selectedApps.clear();
+          selectedId = null;
+          document.getElementById('detail-panel').classList.remove('open');
+          render();
+          showToast(`Loaded ${applications.length} applications`, 'folder-open');
+        },
+        'var(--color-primary)'
+      );
+    } catch(err) {
+      showToast('Could not read file: ' + err.message, 'alert-circle');
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ─── LOCALSTORAGE PERSISTENCE ─────────────────────────────────────────────────
+const STORAGE_KEY = 'jobTracker_v1';
+
+function saveToStorage() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      version: 1,
+      savedAt: new Date().toISOString(),
+      nextId,
+      applications,
+      columnConfig,
+      customColumns,
+      statusConfig,
+      backupHistory,
+    }));
+  } catch(e) {
+    console.warn('localStorage save failed:', e);
+  }
+}
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const payload = JSON.parse(raw);
+    if (!payload || !Array.isArray(payload.applications)) return false;
+    applications = payload.applications;
+    nextId = payload.nextId || (Math.max(0, ...payload.applications.map(a => a.id || 0)) + 1);
+    if (payload.columnConfig && typeof payload.columnConfig === 'object')
+      Object.assign(columnConfig, payload.columnConfig);
+    if (Array.isArray(payload.customColumns))
+      customColumns = payload.customColumns;
+    if (payload.statusConfig && typeof payload.statusConfig === 'object') {
+      Object.assign(statusConfig, payload.statusConfig);
+      Object.entries(statusConfig).forEach(([k, v]) => {
+        if (STATUSCONFIG[k]) STATUSCONFIG[k].label = v.label;
+      });
+    }
+    if (Array.isArray(payload.backupHistory))
+      backupHistory = payload.backupHistory;
+    return true;
+  } catch(e) {
+    console.warn('localStorage load failed:', e);
+    return false;
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+loadFromStorage();   // restore persisted data before first paint
+render();
+lucide.createIcons();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     SETTINGS PANEL
+════════════════════════════════════════════════════════ -->
+<div id="settings-overlay" style="position:fixed;inset:0;background:oklch(0.15 0.01 80/0.45);backdrop-filter:blur(4px);z-index:80;display:none;align-items:flex-start;justify-content:flex-end" onclick="closeSettingsOnOverlay(event)">
+  <div id="settings-panel" style="width:460px;max-width:100vw;height:100dvh;background:var(--color-surface);border-left:1px solid var(--color-border);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.28s cubic-bezier(0.16,1,0.3,1);overflow:hidden">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--space-5) var(--space-6);border-bottom:1px solid var(--color-divider);flex-shrink:0">
+      <div>
+        <div style="font-size:var(--text-lg);font-weight:650;letter-spacing:-0.02em;color:var(--color-text)">Settings</div>
+        <div style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:2px">Customize your tracker</div>
+      </div>
+      <button onclick="closeSettings()" style="color:var(--color-text-muted);padding:var(--space-2);border-radius:var(--radius-md);display:flex;align-items:center;background:none;border:none;cursor:pointer" aria-label="Close settings">
+        <i data-lucide="x" width="18" height="18"></i>
+      </button>
+    </div>
+
+    <!-- Tab bar -->
+    <div style="display:flex;gap:0;border-bottom:1px solid var(--color-divider);flex-shrink:0;padding:0 var(--space-6)">
+      <button class="stab active" data-tab="columns" onclick="switchSettingsTab('columns',this)" style="padding:var(--space-3) var(--space-4);font-size:var(--text-sm);font-weight:500;color:var(--color-text-muted);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all var(--transition-interactive)">Columns</button>
+      <button class="stab" data-tab="statuses" onclick="switchSettingsTab('statuses',this)" style="padding:var(--space-3) var(--space-4);font-size:var(--text-sm);font-weight:500;color:var(--color-text-muted);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all var(--transition-interactive)">Statuses</button>
+      <button class="stab" data-tab="backup" onclick="switchSettingsTab('backup',this)" style="padding:var(--space-3) var(--space-4);font-size:var(--text-sm);font-weight:500;color:var(--color-text-muted);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all var(--transition-interactive)">Backup</button>
+      <button class="stab" data-tab="danger" onclick="switchSettingsTab('danger',this)" style="padding:var(--space-3) var(--space-4);font-size:var(--text-sm);font-weight:500;color:var(--color-error);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all var(--transition-interactive)">Data</button>
+    </div>
+
+    <!-- Tab content -->
+    <div style="flex:1;overflow-y:auto;overscroll-behavior:contain">
+
+      <!-- COLUMNS TAB -->
+      <div id="stab-columns" class="stab-panel" style="padding:var(--space-5) var(--space-6)">
+        <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-5)">Choose which columns appear in the <strong style="color:var(--color-text)">Table view</strong> and which fields show in the <strong style="color:var(--color-text)">Add / Edit form</strong>. Company and Role are always visible.</p>
+        <div id="columns-list" style="display:flex;flex-direction:column;gap:var(--space-2)"></div>
+        <div style="margin-top:var(--space-5);padding-top:var(--space-4);border-top:1px solid var(--color-divider)">
+          <div style="font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-text-muted);margin-bottom:var(--space-3)">Add Custom Column</div>
+          <div style="display:flex;gap:var(--space-3)">
+            <input type="text" id="new-col-name" placeholder="e.g. Referral, Resume Version…" style="flex:1;background:var(--color-bg);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);font-size:var(--text-sm);color:var(--color-text)">
+            <button class="btn btn-primary" onclick="addCustomColumn()" style="flex-shrink:0"><i data-lucide="plus" width="14" height="14"></i> Add</button>
+          </div>
+          <div id="custom-cols-list" style="margin-top:var(--space-3);display:flex;flex-direction:column;gap:var(--space-2)"></div>
+        </div>
+      </div>
+
+      <!-- STATUSES TAB -->
+      <div id="stab-statuses" class="stab-panel" style="display:none;padding:var(--space-5) var(--space-6)">
+        <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-5)">Rename statuses or toggle them on/off. Hidden statuses won't appear in filters or the Kanban board. At least two must stay active.</p>
+        <div id="statuses-list" style="display:flex;flex-direction:column;gap:var(--space-3)"></div>
+        <div style="margin-top:var(--space-5);padding-top:var(--space-4);border-top:1px solid var(--color-divider)">
+          <div style="font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-text-muted);margin-bottom:var(--space-3)">Add Custom Status</div>
+          <div style="display:flex;gap:var(--space-3)">
+            <input type="text" id="new-status-name" placeholder="e.g. Assessment, HR Review…" style="flex:1;background:var(--color-bg);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);font-size:var(--text-sm);color:var(--color-text)">
+            <button class="btn btn-primary" onclick="addCustomStatus()" style="flex-shrink:0"><i data-lucide="plus" width="14" height="14"></i> Add</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BACKUP TAB -->
+      <div id="stab-backup" class="stab-panel" style="display:none;padding:var(--space-5) var(--space-6)">
+
+        <!-- Google Drive -->
+        <div style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);margin-bottom:var(--space-5)">
+          <div style="display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-3)">
+            <svg width="24" height="24" viewBox="0 0 87.3 78" fill="none"><path d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H4.05c0 1.55.4 3.1 1.2 4.5l1.35 2.35z" fill="#0066da"/><path d="M43.65 25L29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3L1.2 49.6c-.8 1.35-1.2 2.9-1.2 4.45h27.45L43.65 25z" fill="#00ac47"/><path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.85l5.85 11.2 7.85 12.6z" fill="#ea4335"/><path d="M43.65 25L57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2L43.65 25z" fill="#00832d"/><path d="M59.85 54.05H27.45L13.7 77.85c1.35.8 2.9 1.2 4.5 1.2h50.6c1.6 0 3.15-.4 4.5-1.2L59.85 54.05z" fill="#2684fc"/><path d="M73.4 27.5l-12.65-21.9c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25l16.2 28.05H87.2c0-1.55-.4-3.1-1.2-4.5L73.4 27.5z" fill="#ffba00"/></svg>
+            <div>
+              <div style="font-size:var(--text-sm);font-weight:600;color:var(--color-text)">Google Drive Backup</div>
+              <div style="font-size:var(--text-xs);color:var(--color-text-muted)">Save a JSON snapshot to your Drive</div>
+            </div>
+            <div id="gdrive-status" style="margin-left:auto;font-size:var(--text-xs);color:var(--color-text-faint)">Not connected</div>
+          </div>
+          <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-4);line-height:1.6">Connect your Google account to save automatic backups. Each backup creates a timestamped file in a <em>JobTrack</em> folder in your Drive.</p>
+          <div style="display:flex;gap:var(--space-3);flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="connectGoogleDrive()" id="gdrive-connect-btn" style="flex:1;min-width:140px">
+              <i data-lucide="link" width="14" height="14"></i> Connect Google Drive
+            </button>
+            <button class="btn btn-ghost" onclick="backupToDrive()" id="gdrive-backup-btn" disabled style="flex:1;min-width:140px;opacity:0.45">
+              <i data-lucide="cloud-upload" width="14" height="14"></i> Backup Now
+            </button>
+          </div>
+          <div id="gdrive-info" style="display:none;margin-top:var(--space-3);font-size:var(--text-xs);color:var(--color-text-muted);background:var(--color-surface-offset);padding:var(--space-3);border-radius:var(--radius-md)"></div>
+        </div>
+
+        <!-- Auto-backup schedule -->
+        <div style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);margin-bottom:var(--space-5)">
+          <div style="font-size:var(--text-sm);font-weight:600;color:var(--color-text);margin-bottom:var(--space-2)">Auto-Backup Schedule</div>
+          <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-4)">Automatically create a local file download on a schedule (requires Google Drive connection for cloud saves).</p>
+          <select id="backup-schedule" onchange="saveBackupSchedule()" style="background:var(--color-bg);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);font-size:var(--text-sm);color:var(--color-text);width:100%">
+            <option value="off">Off</option>
+            <option value="daily">Daily reminder</option>
+            <option value="weekly" selected>Weekly reminder</option>
+          </select>
+        </div>
+
+        <!-- Last backup info -->
+        <div style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5)">
+          <div style="font-size:var(--text-sm);font-weight:600;color:var(--color-text);margin-bottom:var(--space-3)">Backup History</div>
+          <div id="backup-history" style="font-size:var(--text-sm);color:var(--color-text-muted)">No backups yet.</div>
+          <button class="btn btn-ghost" onclick="exportJSON();logBackup()" style="margin-top:var(--space-3);width:100%">
+            <i data-lucide="download" width="14" height="14"></i> Download Local Backup (JSON)
+          </button>
+        </div>
+      </div>
+
+      <!-- DATA / DANGER TAB -->
+      <div id="stab-danger" class="stab-panel" style="display:none;padding:var(--space-5) var(--space-6)">
+        <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-5)">Manage your data. Destructive actions are permanent and cannot be undone.</p>
+
+        <!-- Stats -->
+        <div style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);margin-bottom:var(--space-4)">
+          <div style="font-size:var(--text-sm);font-weight:600;color:var(--color-text);margin-bottom:var(--space-4)">Data Summary</div>
+          <div id="data-summary" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)"></div>
+        </div>
+
+        <!-- Auto-ghost stale applied -->
+        <div style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);margin-bottom:var(--space-4)">
+          <div style="font-size:var(--text-sm);font-weight:600;color:var(--color-text);margin-bottom:var(--space-2)">Auto-Ghost Stale Applications</div>
+          <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-4)">Automatically mark <em>Applied</em> applications as <em>Ghosted</em> if they have had no status update beyond a set number of days. Useful for keeping your pipeline realistic.</p>
+          <div style="display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-4);flex-wrap:wrap">
+            <label style="font-size:var(--text-xs);color:var(--color-text-muted);font-weight:500;text-transform:none;letter-spacing:0">Mark as ghosted after</label>
+            <div style="display:flex;align-items:center;gap:var(--space-2)">
+              <input type="number" id="ghost-days-input" value="60" min="7" max="365" oninput="previewAutoGhost()"
+                style="width:72px;background:var(--color-bg);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);font-size:var(--text-sm);color:var(--color-text);text-align:center;font-variant-numeric:tabular-nums">
+              <span style="font-size:var(--text-xs);color:var(--color-text-muted);font-weight:500">days without a response</span>
+            </div>
+          </div>
+          <div id="ghost-preview" style="font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-4);min-height:18px"></div>
+          <button class="btn btn-ghost" onclick="autoGhostStale()" style="width:100%;border-color:var(--color-primary);color:var(--color-primary)" onmouseenter="previewAutoGhost()">
+            <i data-lucide="ghost" width="14" height="14"></i> Mark Stale Applications as Ghosted
+          </button>
+        </div>
+
+        <!-- Clear rejected/ghosted -->
+        <div style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);margin-bottom:var(--space-4)">
+          <div style="font-size:var(--text-sm);font-weight:600;color:var(--color-text);margin-bottom:var(--space-2)">Archive Closed Applications</div>
+          <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-4)">Remove all applications with <em>Rejected</em> or <em>Ghosted</em> status to declutter your board. Export first if you want to keep records.</p>
+          <button class="btn btn-ghost" onclick="clearClosedApps()" style="width:100%;border-color:var(--color-warning);color:var(--color-warning)">
+            <i data-lucide="archive" width="14" height="14"></i> Archive Rejected & Ghosted
+          </button>
+        </div>
+
+        <!-- Reset to sample data -->
+        <div style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);margin-bottom:var(--space-4)">
+          <div style="font-size:var(--text-sm);font-weight:600;color:var(--color-text);margin-bottom:var(--space-2)">Reset to Sample Data</div>
+          <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-4)">Wipe all current data and restore the original sample applications. Useful for demos or starting fresh.</p>
+          <button class="btn btn-ghost" onclick="resetToSampleData()" style="width:100%;border-color:var(--color-warning);color:var(--color-warning)">
+            <i data-lucide="rotate-ccw" width="14" height="14"></i> Reset to Sample Data
+          </button>
+        </div>
+
+        <!-- Danger zone -->
+        <div style="background:var(--color-error-highlight);border:1px solid var(--color-error);border-radius:var(--radius-lg);padding:var(--space-5)">
+          <div style="font-size:var(--text-sm);font-weight:600;color:var(--color-error);margin-bottom:var(--space-2)">Danger Zone</div>
+          <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-4)">Permanently delete <strong style="color:var(--color-text)">all</strong> applications. This cannot be undone. Please export a backup first.</p>
+          <button class="btn" onclick="clearAllData()" style="width:100%;background:var(--color-error);color:white;border-color:var(--color-error)">
+            <i data-lucide="trash-2" width="14" height="14"></i> Delete All Applications
+          </button>
+        </div>
+      </div>
+
+    </div><!-- end tab content -->
+  </div><!-- end panel -->
+</div><!-- end overlay -->
+
+<!-- CONFIRM DIALOG -->
+<div id="confirm-dialog" style="position:fixed;inset:0;background:oklch(0.15 0.01 80/0.55);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;padding:var(--space-4)">
+  <div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-6);max-width:380px;width:100%;box-shadow:var(--shadow-lg)">
+    <div style="font-size:var(--text-base);font-weight:650;color:var(--color-text);margin-bottom:var(--space-2)" id="confirm-title">Are you sure?</div>
+    <div style="font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-5)" id="confirm-message"></div>
+    <div style="display:flex;gap:var(--space-3);justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn" id="confirm-ok-btn" onclick="executeConfirm()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
